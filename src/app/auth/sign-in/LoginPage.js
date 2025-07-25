@@ -27,6 +27,12 @@ export default function LoginPage () {
         })
     };
 
+    // Go to forget password
+    const goToForgetPassword = () => {
+        router.push('/auth/forget-password');
+        setIsLoading(true);
+    };
+
     // Handle form submit
     const formSubmit = async (event) => {
         event.preventDefault();
@@ -86,11 +92,11 @@ export default function LoginPage () {
                         <div className="flex flex-col">
                             <label>Email</label>
                             <input 
-                            name="email"
-                            value={formData.email}
-                            onChange={formDataChange}
-                            className="input-fields"
-                            placeholder="Enter your email"
+                                name="email"
+                                value={formData.email}
+                                onChange={formDataChange}
+                                className="input-fields"
+                                placeholder="Enter your email"
                             />
                         </div>
                         <div className="flex flex-col">
@@ -103,11 +109,12 @@ export default function LoginPage () {
                             placeholder="At least 8 characters"
                             />
                         </div>
-                        <a 
+                        <button
+                            onClick={goToForgetPassword}
                             className="text-sm hover:underline text-[#A23E48] cursor-pointer text-right"
                         >
                             Forget Password?
-                        </a>
+                        </button>
                     </div>
 
                     {/*Button Sign in and Google Sign in*/}

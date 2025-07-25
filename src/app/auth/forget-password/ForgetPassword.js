@@ -1,9 +1,8 @@
 'use client'
 
-import Link from "next/link"
 import { useState } from 'react';
-import { loginUser } from "@/app/api/auth";
 import LoadingPage from "@/app/loading-comp/LoadingPage";
+import { forgetPassword } from '@/app/api/auth';
 import { useRouter } from "next/navigation";
 
 export default function ForgetPassword () {
@@ -13,49 +12,44 @@ export default function ForgetPassword () {
     const router = useRouter();
 
     // Form data state
-    const [formData, setFormData] = useState({
-        email: '',
-    });
+    const [email, setEmail] = useState("");
 
     // Handle input change
-    const formDataChange = (event) => {
-        setFormData({
-            ...formData,
-            [event.target.name]: event.target.value
-        })
+    const handleEmailChange = (event) => {
+        setEmail(event.target.value);
     };
 
     // Handle go to login
+    const backToLogin = () => {
+        router.push('/auth/sign-in');
+    };
 
     // Handle form submit
     const formSubmit = async (event) => {
         event.preventDefault();
         setError("");
         setMessage("");
+        setEmail("")
         setIsLoading(true);
-        const { email, password } = formData;
 
         // Validation
-        if (!email || !password) {
+        if (!email) {
             setError(`All fields are required`);
+            setIsLoading(false);
             return;
-        };
-        // Check if password length < 8
-        if (password.length < 8) {
-            setError("Password must be at least 8 characters");
-            return;
-        };
+        }
 
         try {
-            const result = await loginUser(email, password);
+            const result = await forgetPassword(email);
 
-            if(result.success) {
-                setMessage("Signing in");
-                window.location.href='/';
-            } 
+            if(result && result.success) {
+                setMessage(result.message);
+            } else {
+                setError(result?.message || "Failed to send reset email");
+            }
         } catch (error) {
-            setError(error)
-
+            console.error("API Error:", error);
+            setError(error?.message || "An unexpected error occurred");
         } finally {
             setIsLoading(false);
         }
@@ -64,13 +58,14 @@ export default function ForgetPassword () {
     if(isLoading) {
         return <LoadingPage />
     }
+
     return (
         <div className="flex items-center justify-center min-h-screen ">
             <form onSubmit={formSubmit}>
                 <div className="flex flex-col bg-white p-10 rounded-lg card-shadow min-w-sm gap-5">
                     <div className="flex flex-row">
                         <button 
-                            onClick={() => router.push('/sign-in')}
+                            onClick={backToLogin}
                             type="button"
                         >
                             <img 
@@ -99,18 +94,23 @@ export default function ForgetPassword () {
                         <div className="flex flex-col">
                             <label>Email</label>
                             <input 
+                            type='email'
                             name="email"
-                            value={formData.email}
-                            onChange={formDataChange}
+                            value={email}
+                            onChange={handleEmailChange}
                             className="input-fields"
                             placeholder="Enter your email"
+                            required
                             />
                         </div>
                     </div>
 
-                    {/*Button Sign in and Google Sign in*/}
+                    {/*Button to reset password*/}
                     <div className="flex flex-col gap-2">
-                        <button className="button-bg">
+                        <button 
+                            type='submit'
+                            className="button-bg"
+                        >
                             Reset password
                         </button>
                     </div>

@@ -7,7 +7,8 @@ import {
     signOut,
     GoogleAuthProvider,
     signInWithPopup,
-    getAuth
+    getAuth,
+    sendPasswordResetEmail
 } from "firebase/auth";
 
 /**
@@ -90,6 +91,11 @@ export const logoutUser = async () => {
     }
 };
 
+/**
+ * Signing out a user
+ * @returns {object} - Success status and user data or error
+ */
+
 export const googleLogin = async () => {
     try {
         const provider = new GoogleAuthProvider();
@@ -99,6 +105,7 @@ export const googleLogin = async () => {
 
         return {
             success: true,
+            message: 'Successfully sign in with Google ',
             uid: user.uid,
             email: user.email,
             username: user.email
@@ -107,6 +114,30 @@ export const googleLogin = async () => {
         return {
             success: false,
             error: error.code
+        }
+    }
+};
+
+// Forget password
+
+export const forgetPassword = async (email) => {
+    try {
+        const actionCodeSettings = {
+             url: `${process.env.NEXT_PUBLIC_LOCAL_URL}/auth/sign-in?email=` + email,
+            handleCodeInApp: true,
+        };
+        await sendPasswordResetEmail(auth, email, actionCodeSettings);
+
+        return {
+            success: true,
+            message: 'Password reset email sent!',
+
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: error.code,
+            message: error.message
         }
     }
 };

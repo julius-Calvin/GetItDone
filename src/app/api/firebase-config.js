@@ -17,9 +17,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-export const actionCodeSettings = {
-    url: process.env.NEXT_PUBLIC_LOCAL_URL,
-    handleCodeInApp: true,
-};
+
 
 
