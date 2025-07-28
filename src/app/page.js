@@ -10,10 +10,8 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSignedIn, setIsSignedIn] = useState(false);
-
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("")
-  
+
   const router = useRouter();
 
   // Check if already signed in
@@ -25,10 +23,11 @@ export default function Home() {
       } else {
         setIsSignedIn(false);
         setIsLoading(false);
+        router.push('/auth/sign-in');
       }
     });
     return () => unsubscribe();
-  }, [])
+}, [router]);
 
   // Sign in button handler
   const goToSignIn = () => {
@@ -39,30 +38,33 @@ export default function Home() {
   // Sign out button handler
   const signOutUser = async (event) => {
     event.preventDefault();
-    setIsLoading(true)
+    setIsLoading(true);
+    
     try {
       const result = await logoutUser();
 
-      if (result.success) {
-        router.push('/auth/sign-in');
+      if (result && result.success) {
+        // Let onAuthStateChanged handle the redirect automatically
+      } else {
+        // Handle case when logout fails
+        setError(result?.message || "Failed to sign out");
+        setIsLoading(false);
       }
+
     } catch (error) {
-      setError(error.message);
+      setError(error?.message || "An error occurred");
       setIsLoading(false);
     }
   };
+
   if (isLoading) {
     return <LoadingPage />
   }
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center">
-        {/* Alert to show message and error */}
-        {message && (
-          <div className="p-2 text-center rounded-lg text-[white] bg-green-700/80">
-            {message}
-          </div>
-        )}
+        {/* Alert to show  error */}
         {error && (
           <div className="p-2 text-center rounded-lg text-[white] bg-red-700/80">
             {error}
@@ -70,10 +72,10 @@ export default function Home() {
         )}
         {!isSignedIn && (
           <button
-          onClick={goToSignIn}
-          className="text-[#F3F1F1] font-bold button-bg p-4 text-xl cursor-pointer"
-          disabled={isLoading}
-        >Sign in</button>
+            onClick={goToSignIn}
+            className="text-[#F3F1F1] font-bold button-bg p-4 text-xl cursor-pointer"
+            disabled={isLoading}
+          >Get Started</button>
         )}
         {isSignedIn && (
           <button

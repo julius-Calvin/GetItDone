@@ -1,5 +1,5 @@
 
-import { auth, actionCodeSettings } from "./firebase-config";
+import { auth } from "./firebase-config";
 import {
     createUserWithEmailAndPassword,
     sendEmailVerification,
@@ -76,17 +76,17 @@ export const loginUser = async (email, password) => {
 
 export const logoutUser = async () => {
     try {
-        const userCredential = await signOut(auth);
-        const user = userCredential.user;
+        await signOut(auth);
 
         return {
             success: true,
-            user: user
+            message: 'Successfully signed out'
         }
     } catch (error) {
         return {
             success: false,
-            error: error.code
+            error: error.code,
+            message: error.message
         }
     }
 };

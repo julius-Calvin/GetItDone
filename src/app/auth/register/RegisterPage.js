@@ -6,9 +6,12 @@ import { registerUser } from "@/app/api/auth";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import GoogleButton from "../GoogleButton";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function RegisterPage() {
     const [isLoading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // State for data
     const [formData, setFormData] = useState({
@@ -30,6 +33,16 @@ export default function RegisterPage() {
             ...formData,
             [event.target.name]: event.target.value
         })
+    };
+
+    // Toggle password visibility
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    // Toggle confirm password visibility
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
     };
 
     // Error message cases
@@ -120,35 +133,57 @@ export default function RegisterPage() {
                                 onChange={handleInputChange}
                                 className="input-fields"
                                 placeholder="Enter your email"
+                                required
                             />
                         </div>
                         <div className="flex flex-col">
                             <label>Password</label>
-                            <input
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                className="input-fields"
-                                placeholder="At least 8 characters"
-                            />
+                            <div className="relative">
+                                <input
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    className="input-fields w-full pr-10"
+                                    placeholder="At least 8 characters"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={togglePasswordVisibility}
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200"
+                                >
+                                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                                </button>
+                            </div>
                         </div>
                         <div className="flex flex-col">
                             <label>Confirm Password</label>
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={handleInputChange}
-                                className="input-fields"
-                                placeholder="Password must match"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleInputChange}
+                                    className="input-fields w-full pr-10"
+                                    placeholder="Password must match"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={toggleConfirmPasswordVisibility}
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200"
+                                >
+                                    {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                                </button>
+                            </div>
                         </div>
-                        <a
+                        <Link
+                            href="/auth/forget-password"
                             className="text-sm hover:underline text-[#A23E48] cursor-pointer text-right"
                         >
                             Forget Password?
-                        </a>
+                        </Link>
                     </div>
 
                     {/*Button Sign in and Google Sign in*/}

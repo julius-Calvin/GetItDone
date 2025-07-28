@@ -46,7 +46,7 @@ body {
 }
 .button-bg {
   padding: 5px;
-  color: #F5ECCD;
+  color: white;
   border-radius: 8px;
   background-color: #A23E48;
   transform: scale(100%);
@@ -76,4 +76,8 @@ body {
 
 .card-shadow {
   box-shadow: 0 4px 5px 0 black;
+}
+
+.sidebar-menu-active {
+  background-color: #A23E48;
 }
