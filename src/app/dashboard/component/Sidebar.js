@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function Sidebar ({ activeView, setActiveView }) {
+    const [isLoading, setIsLoading] = useState(true);
+    
     const [userInfo, setUserInfo] = useState({
         displayName: '',
         photoURL: ''
@@ -13,7 +15,7 @@ export default function Sidebar ({ activeView, setActiveView }) {
     
     // Get current user
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged (auth, (currentUser) => {
             if (currentUser) {
                 setUserInfo({
                     displayName: currentUser.displayName,
@@ -25,6 +27,7 @@ export default function Sidebar ({ activeView, setActiveView }) {
                     photoURL:''
                 });
             }
+            setIsLoading(false);
         });
         
         return () => unsubscribe();
@@ -32,7 +35,7 @@ export default function Sidebar ({ activeView, setActiveView }) {
 
     return (
         <div className="flex flex-col min-h-screen items-center bg-[#F3F1F1]">
-            <div className="p-2 w-full">
+            <div className="p-2 min-w-7">
                 {/* Profile Section*/}
                 <div className="flex flex-row p-3 gap-3 items-center mb-6">
                     <div className="relative w-10 h-10">
@@ -44,7 +47,7 @@ export default function Sidebar ({ activeView, setActiveView }) {
                             sizes="100px"
                         />
                     </div>
-                    <p>{userInfo.displayName}</p>
+                    <p>{isLoading? <span className="italic">Fetching username...</span> : userInfo.displayName}</p>
                 </div>
 
                 {/* Navigation */}
