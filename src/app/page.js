@@ -27,7 +27,7 @@ export default function Home() {
       }
     });
     return () => unsubscribe();
-}, [router]);
+  }, [router]);
 
   // Sign in button handler
   const goToSignIn = () => {
@@ -39,7 +39,7 @@ export default function Home() {
   const signOutUser = async (event) => {
     event.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const result = await logoutUser();
 
@@ -78,11 +78,21 @@ export default function Home() {
           >Get Started</button>
         )}
         {isSignedIn && (
-          <button
-            onClick={signOutUser}
-            className="text-[#F3F1F1] font-bold button-bg p-4 text-xl cursor-pointer"
-            disabled={isLoading}
-          >Sign out</button>
+          <div className="flex gap-2">
+            <button
+              onClick={signOutUser}
+              className="text-[#F3F1F1] font-bold button-bg p-4 text-xl cursor-pointer"
+              disabled={isLoading}
+            >Sign out</button>
+            <button
+              onClick={() => {
+                router.push('/dashboard');
+                setIsLoading(true);
+              }}
+              className="text-[#F3F1F1] font-bold button-bg p-4 text-xl cursor-pointer"
+              disabled={isLoading}
+            >Dashboard</button>
+          </div>
         )}
       </main>
     </div>

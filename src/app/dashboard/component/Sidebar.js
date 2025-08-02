@@ -5,9 +5,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-export default function Sidebar ({ activeView, setActiveView }) {
+export default function Sidebar ({ activeView, setActiveView }) {    
     const [isLoading, setIsLoading] = useState(true);
-    
     const [userInfo, setUserInfo] = useState({
         displayName: '',
         photoURL: ''
@@ -47,7 +46,7 @@ export default function Sidebar ({ activeView, setActiveView }) {
                             sizes="100px"
                         />
                     </div>
-                    <p>{isLoading? <span className="italic">Fetching username...</span> : userInfo.displayName}</p>
+                    <p className="font-bold"> {isLoading?<span>Fetching username.....</span>:userInfo.displayName}</p>
                 </div>
 
                 {/* Navigation */}
