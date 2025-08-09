@@ -1,13 +1,15 @@
 import { googleLogin } from "@/app/api/auth";
 import { useRouter } from "next/navigation";
 
-export default function GoogleButton() {
+export default function GoogleButton({ setIsLoading }) {
     const router = useRouter();
-
     // Handle google login
     const googleLoginHandler = async () => {
-        await googleLogin();
-        router.push('/');
+        const result = await googleLogin();
+        if (result.success) {
+            setIsLoading(true);
+            router.push('/dashboard')
+        };
     };
 
     return (

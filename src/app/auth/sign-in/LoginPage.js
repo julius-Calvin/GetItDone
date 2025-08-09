@@ -36,10 +36,15 @@ export default function LoginPage () {
 
     // Go to forget password
     const goToForgetPassword = () => {
-        router.push('/auth/forget-password');
         setIsLoading(true);
+        router.push('/auth/forget-password');
     };
 
+    // Go to home page
+    const goToHome = () => {
+        setIsLoading(true);
+        router.push('/');
+    };
     // Handle form submit
     const formSubmit = async (event) => {
         event.preventDefault();
@@ -85,7 +90,10 @@ export default function LoginPage () {
         <div className="flex items-center justify-center min-h-screen ">
             <form onSubmit={formSubmit}>
                 <div className="flex flex-col bg-white p-10 rounded-lg card-shadow min-w-sm gap-5">
-                    <h1 className="text-center font-bold">WELCOME BACK</h1>
+                    <div className="flex flex-row">
+                        <button type="button" onClick={goToHome} className="hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out"><img src="/back-button.svg" className="w-5"/></button>
+                        <span className="flex text-center w-full"><h1 className="font-bold w-full">WELCOME BACK</h1></span>
+                    </div>
                     
                     {/* Alert to show message and error */}
                     {message && (
@@ -150,7 +158,7 @@ export default function LoginPage () {
                         <p className="text-center">or</p>
                         
                         {/* Google */}
-                        <GoogleButton />
+                        <GoogleButton setIsLoading={setIsLoading} />
                        
                         <span className="gap-1 justify-center text-center text-sm flex flex-row ">
                             <p>Don't have an account?</p>

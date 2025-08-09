@@ -23,7 +23,6 @@ export default function Home() {
       } else {
         setIsSignedIn(false);
         setIsLoading(false);
-        router.push('/auth/sign-in');
       }
     });
     return () => unsubscribe();
