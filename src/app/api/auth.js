@@ -1,4 +1,6 @@
 
+'use client'
+
 import { auth } from "./firebase-config";
 import {
     createUserWithEmailAndPassword,
@@ -8,8 +10,41 @@ import {
     GoogleAuthProvider,
     signInWithPopup,
     getAuth,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    onAuthStateChanged
 } from "firebase/auth";
+import { createContext, useContext, useEffect, useState } from "react";
+
+// Create Auth Context
+const AuthContext = createContext({});
+
+// Auth Provider Component
+export function AuthProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user);
+            } else {
+                setUser(null);
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    return (
+        <AuthContext.Provider value={{ user, loading }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+// Custom Auth Hook
+export const useAuth = () => useContext(AuthContext);
 
 /**
  * Register a new user with email and password

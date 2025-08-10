@@ -4,11 +4,13 @@ import { auth } from "@/app/api/firebase-config";
 import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { FaPlus, FaSave } from "react-icons/fa";
+import { FaTrashCan } from "react-icons/fa6";
 import { addTask, getTodayTasks, updateTask } from "@/app/api/note-api";
 import { MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import { ImCheckboxChecked } from "react-icons/im";
 import { BsGripVertical } from "react-icons/bs";
+import { deleteTask } from "@/app/api/note-api";
 import LoadingPage from "@/app/loading-comp/LoadingPage";
 import React from "react";
 import {
@@ -30,6 +32,8 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { MdOutlineVisibilityOff } from "react-icons/md";
+import { useRouter } from "next/navigation";
 
 // Sortable Task Item Component
 const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFinished, handleSaveClick, handleCancelButtonClick, localTitle, setLocalTitle, localDescription, setLocalDescription, inputRef, textareaRef }) => {
@@ -117,7 +121,7 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
                                 )}
                             </button>
                         </div>
-                        
+
                         {/* Drag handle for unfinished tasks */}
                         {!task?.isFinished && (
                             <div
@@ -128,7 +132,7 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
                                 <BsGripVertical className="w-4 h-4" />
                             </div>
                         )}
-                        
+
                         <div>
                             <h4 className="font-bold">{task.title}</h4>
                             <p className={`${task.description ? "" : "italic text-white/50"} text-sm opacity-90`}>
@@ -136,7 +140,7 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
                             </p>
                         </div>
                     </div>
-                    
+
                     {/* Edit button */}
                     <div className="flex gap-2">
                         <button
@@ -159,7 +163,38 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
     );
 };
 
+const DeleteConfirmationAlert = ({ isOpen, onClose, onConfirm, title, message }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-[#F3F1F1] rounded-lg p-6 shadow-lg w-[350px] flex flex-col gap-4" onClick={e => e.stopPropagation()}>
+                <h2 className="text-lg font-bold text-[#A23E48]">{title}</h2>
+                <p className="text-gray-700">{message}</p>
+                <div className="flex justify-end gap-3 mt-2">
+                    <button
+                        className="hover:cursor-pointer font-bold px-4 rounded-lg py-2 bg-gray-300 hover:bg-gray-400/50 hover:scale-105 transition-all duration-300 ease-in-out"
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className="hover:cursor-pointer hover:scale-105 font-bold px-4 py-2 rounded-lg bg-[#A23E48] text-white hover:bg-[#8e3640] transition-all duration-300 ease-in-out"
+                        onClick={() => {
+                            onConfirm();
+                            onClose();
+                        }}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export const Today = () => {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthResolved, setIsAuthResolved] = useState(false);
     const [user, setUser] = useState(null);
@@ -292,11 +327,11 @@ export const Today = () => {
         }
     };
 
-    const NoTaskCard = () => {
+    const NoTaskCard = () => {      
         return (
             <div className="p-4">
                 <div className="flex flex-col items-center text-2xl font-bold gap-3">
-                    <span className="flex gap-1">No <p className="text-[#2E5A88]">Task</p> for today yet</span>
+                    <span className="flex gap-1">No <p className="text-[#A23E48]">Task</p> for today yet</span>
                     <button
                         type="button"
                         className="button-bg text-xl"
@@ -318,6 +353,7 @@ export const Today = () => {
         const [localTitle, setLocalTitle] = useState("");
         const [localDescription, setLocalDescription] = useState("");
 
+        const unfinishedTask = tasks.filter((task) => !task.isFinished);
         useEffect(() => {
             if (editIdx !== null) {
                 setLocalTitle(tasks[editIdx]?.title || "");
@@ -361,7 +397,7 @@ export const Today = () => {
                 const isFinished = tasks[idx].isFinished;
                 const updatedData = {
                     ...tasks[idx],
-                    isFinished: !isFinished,
+                    isFinished: true,
                 };
 
                 await updateTask(taskId, updatedData);
@@ -376,6 +412,7 @@ export const Today = () => {
             }
         };
 
+        // Render
         return (
             <DndContext
                 sensors={sensors}
@@ -384,7 +421,7 @@ export const Today = () => {
             >
                 <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-4">
-                        {tasks.map((task, index) => (
+                        {unfinishedTask.map((task, index) => (
                             <SortableTaskItem
                                 key={task.id}
                                 task={task}
@@ -407,9 +444,194 @@ export const Today = () => {
             </DndContext>
         );
     };
+    // Finsihed Task 
+    const FinishedTask = () => {
+        // Filter out finished tasks
+        const finishedTasks = tasks.filter(task => task.isFinished);
+        
+        // State for delete confirmation alerts
+        const [deleteAlert, setDeleteAlert] = useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            taskId: null,
+            isDeleteAll: false
+        });
+        
+        // Close the alert
+        const closeDeleteAlert = () => {
+            setDeleteAlert({
+                isOpen: false,
+                title: "",
+                message: "",
+                taskId: null,
+                isDeleteAll: false
+            });
+        };
 
+        const handleFinishedTaskClick = async (e, taskId) => {
+            e.preventDefault();
+            try {
+                // Find the task index in the original tasks array
+                const taskIdx = tasks.findIndex(task => task.id === taskId);
+
+                if (taskIdx !== -1) {
+                    const updatedData = {
+                        ...tasks[taskIdx],
+                        isFinished: false,
+                    };
+
+                    await updateTask(taskId, updatedData);
+
+                    setTasks((prevTasks) => {
+                        const updatedTasks = [...prevTasks];
+                        updatedTasks[taskIdx] = updatedData;
+                        return updatedTasks;
+                    });
+                }
+            } catch (error) {
+                console.error("Error marking task as incomplete:", error);
+            }
+        };
+
+        // Show confirmation before deleting a single task
+        const confirmDeleteTask = (taskId) => {
+            const taskToDelete = tasks.find(task => task.id === taskId);
+            if (!taskToDelete) return;
+            
+            setDeleteAlert({
+                isOpen: true,
+                title: "Delete Task",
+                message: `Are you sure you want to delete "${taskToDelete.title}"?`,
+                taskId: taskId,
+                isDeleteAll: false
+            });
+        };
+        
+        // Show confirmation before deleting all tasks
+        const confirmDeleteAllTasks = () => {
+            const taskCount = finishedTasks.length;
+            
+            setDeleteAlert({
+                isOpen: true,
+                title: "Delete All Finished Tasks",
+                message: `Are you sure you want to delete all ${taskCount} finished ${taskCount === 1 ? 'task' : 'tasks'}?`,
+                taskId: null,
+                isDeleteAll: true
+            });
+        };
+
+        // Handle actual deletion of a task
+        const handleDeleteTask = async (taskId) => {
+            try {
+                // Delete the task from Firestore
+                await deleteTask(taskId);
+                
+                // Remove the task from local state
+                setTasks((prevTasks) => prevTasks.filter(task => task.id !== taskId));
+            } catch (error) {
+                console.error("Error deleting task:", error);
+                setError("Failed to delete task.");
+            }
+        };
+
+        // Handle actual deletion of all finished tasks
+        const handleDeleteAllFinished = async () => {
+            if (!finishedTasks.length) return;
+            
+            try {
+                // Create an array of promises to delete each finished task
+                const deletePromises = finishedTasks.map(task => deleteTask(task.id));
+                
+                // Execute all delete operations
+                await Promise.all(deletePromises);
+                
+                // Update the local state to remove all finished tasks
+                setTasks((prevTasks) => prevTasks.filter(task => !task.isFinished));
+            } catch (error) {
+                console.error("Error deleting all finished tasks:", error);
+                setError("Failed to delete all finished tasks.");
+            }
+        };
+        
+        // Handle the confirmation from the alert
+        const handleDeleteConfirm = () => {
+            if (deleteAlert.isDeleteAll) {
+                handleDeleteAllFinished();
+            } else if (deleteAlert.taskId) {
+                handleDeleteTask(deleteAlert.taskId);
+            }
+        };
+
+        return (
+            <div className="flex flex-col card-shadow p-5 rounded-lg bg-[#F3F1F1] mt-5">
+                <div className="flex justify-between items-center mb-3">
+                    <h1 className="font-bold text-xl">Finished</h1>
+                    {finishedTasks.length > 0 && (
+                        <button
+                            onClick={confirmDeleteAllTasks}
+                            className="bg-[#A23E48] text-white px-3 py-1 rounded-md text-sm hover:scale-105 transition-all duration-300 ease-in-out hover:cursor-pointer flex items-center gap-1"
+                        >
+                            <FaTrashCan className="w-4 h-4 bg-[#A23E48]" />
+                        </button>
+                    )}
+                </div>
+                
+                {finishedTasks.length > 0 ? (
+                    <div className="space-y-3">
+                        {finishedTasks.map((task) => (
+                            <div
+                                key={task.id}
+                                className="bg-[#A23E48] bg-opacity-80 rounded-lg p-3 text-white flex items-center gap-3"
+                            >
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                    <button
+                                        onClick={(e) => handleFinishedTaskClick(e, task.id)}
+                                        className="hover:cursor-pointer"
+                                        type="button"
+                                    >
+                                        <ImCheckboxChecked />
+                                    </button>
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-bold">{task.title}</h4>
+                                    <p className={`${task.description ? "" : "italic text-white/50"} text-sm opacity-90`}>
+                                        {task.description || "No description"}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => confirmDeleteTask(task.id)}
+                                    className="text-white hover:cursor-pointer hover:scale-105 transition-colors duration-200"
+                                    title="Delete task"
+                                >
+                                    <RxCross2 className="w-5 h-5" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-500 italic">No finished tasks yet</p>
+                )}
+                
+                {/* Render the custom alert component */}
+                <DeleteConfirmationAlert
+                    isOpen={deleteAlert.isOpen}
+                    onClose={closeDeleteAlert}
+                    onConfirm={handleDeleteConfirm}
+                    title={deleteAlert.title}
+                    message={deleteAlert.message}
+                />
+            </div>
+        )
+    };
+    // Add this function to handle navigation to the Pomodoro page
+    const navigateToPomodoro = () => {
+        router.push('/dashboard/pomodoro');
+    };
+
+    // Render all element
     return (
-        <div className="flex-1 bg-white">
+        <div className="flex-1 bg-white relative">
             {/* Header Section */}
             <div className="w-full p-7 bg-white">
                 <div className="flex flex-col gap-2">
@@ -427,8 +649,11 @@ export const Today = () => {
 
             {/* Main Content Section */}
             <div className="p-5">
-                <div className="flex-1 ">
+                <div className="flex-1">
                     <div className="p-5 flex flex-col bg-[#F3F1F1] card-shadow rounded-lg">
+                        <div className="mb-2">
+                            <h1 className="font-bold text-xl ">Finish your task!</h1>
+                        </div>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
                         ) : tasks.length > 0 ? (
@@ -454,7 +679,7 @@ export const Today = () => {
                         {showModal && (
                             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                                 <form
-                                    className="bg-white rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4"
+                                    className="bg-[#F3F1F1] rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4"
                                     onSubmit={handleAddTask}
                                 >
                                     <h2 className="text-lg font-bold mb-2">Add Task</h2>
@@ -474,14 +699,14 @@ export const Today = () => {
                                     {error && <p className="text-red-500 text-sm">{error}</p>}
                                     <div className="flex justify-end gap-2">
                                         <button
-                                            className="px-4 rounded-lg py-2 bg-gray-300"
+                                            className="px-4 rounded-lg py-2 bg-gray-300 hover:scale-105 hover:bg-gray-400/70 hover:cursor-pointer transition-all duration-300 ease-in-out"
                                             onClick={() => setShowModal(false)}
                                             type="button"
                                         >
                                             Cancel
                                         </button>
                                         <button
-                                            className="px-4 py-2 rounded-lg bg-[#2E5A88] text-white flex items-center gap-2 justify-center hover:cursor-pointer"
+                                            className="px-4 py-2 rounded-lg bg-[#A23E48] text-white flex items-center gap-2 justify-center hover:cursor-pointer hover:scale-105 hover:bg-[#8e3640] transition-all duration-300 ease-in-out"
                                             type="submit"
                                         >
                                             <FaSave className="w-5 h-5" />
@@ -492,8 +717,19 @@ export const Today = () => {
                             </div>
                         )}
                     </div>
+                    <FinishedTask />
                 </div>
             </div>
+
+            {/* Floating Eye Button */}
+            <button 
+                onClick={navigateToPomodoro}
+                className="hover:cursor-pointer fixed bottom-6 right-6 bg-[#A23E48] text-white p-4 rounded-full shadow-lg hover:bg-[#8e3640] transition-all duration-300 hover:scale-110 z-30"
+                aria-label="Focus Mode"
+                title="Pomodoro Mode"
+            >
+                <MdOutlineVisibilityOff className="w-6 h-6" />
+            </button>
         </div>
     );
 };

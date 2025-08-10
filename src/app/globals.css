@@ -75,7 +75,7 @@ body {
 }
 
 .card-shadow {
-  box-shadow: 0 4px 5px 0 black;
+  box-shadow: 0 5px 5px 0 gray;
 }
 
 .sidebar-menu-active {

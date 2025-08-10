@@ -8,7 +8,8 @@ import {
     orderBy, 
     query,
     doc,
-    updateDoc
+    updateDoc,
+    deleteDoc
 } from "firebase/firestore";
 
 // Create task with date filtering
@@ -119,6 +120,16 @@ export const updateTask = async (taskId, updatedData) => {
       updatedAt: new Date().toISOString(),
     });
     console.log(updatedData);
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete task
+export const deleteTask = async (taskId) => {
+  try {
+    const taskRef = doc(db, "tasks", taskId);
+    await deleteDoc(taskRef);
   } catch (error) {
     throw error;
   }
