@@ -7,7 +7,7 @@ import React from "react";
 // Firebase imports
 import { auth } from "@/app/api/firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
-import { addTask, getTodayTasks, getTomorrowTasks, updateTask } from "@/app/api/note-api";
+import { addTask, getTodayTasks, getTomorrowTasks, updateTask, deleteTask } from "@/app/api/note-api";
 
 // React Icons imports
 import { FaPlus, FaSave } from "react-icons/fa";
@@ -15,6 +15,7 @@ import { MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import { ImCheckboxChecked } from "react-icons/im";
 import { BsGripVertical } from "react-icons/bs";
+import { FiTrash2 } from "react-icons/fi";
 
 // Component imports
 import LoadingPage from "@/app/loading-comp/LoadingPage";
@@ -55,7 +56,9 @@ const SortableTaskItem = ({
     setLocalDescription, 
     inputRef, 
     textareaRef,
-    taskType // 'today' or 'tomorrow'
+    taskType, // 'today' or 'tomorrow'
+    isSavingEdit,
+    confirmDeleteTask,
 }) => {
     const {
         attributes,
@@ -87,35 +90,48 @@ const SortableTaskItem = ({
                         <div className="flex flex-col gap-2 w-full">
                             <input
                                 ref={inputRef}
-                                className="font-bold outline-none bg-white/10 rounded px-3 py-2 text-white placeholder-white/60 border border-white/20 focus:border-white/40 transition-colors w-full"
+                                className="font-bold outline-none bg-white/10 rounded px-3 py-2 text-white placeholder-white/60 border border-white/20 focus:border-white/40 transition-colors w-full disabled:opacity-60"
                                 value={localTitle}
                                 onChange={(e) => setLocalTitle(e.target.value)}
                                 placeholder="Task title"
+                                disabled={isSavingEdit}
                             />
                             <textarea
                                 ref={textareaRef}
-                                className="text-sm outline-none bg-white/10 rounded px-3 py-2 text-white placeholder-white/60 border border-white/20 focus:border-white/40 transition-colors resize-none w-full"
+                                className="text-sm outline-none bg-white/10 rounded px-3 py-2 text-white placeholder-white/60 border border-white/20 focus:border-white/40 transition-colors resize-none w-full disabled:opacity-60"
                                 value={localDescription}
                                 onChange={(e) => setLocalDescription(e.target.value)}
                                 placeholder="Task description"
                                 rows="3"
+                                disabled={isSavingEdit}
                             />
                         </div>
                         <div className="flex justify-center gap-3 pt-2">
                             <button
-                                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 flex items-center gap-2"
+                                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                 type="button"
                                 onClick={handleCancelButtonClick}
+                                disabled={isSavingEdit}
                             >
                                 <RxCross2 className="w-4 h-4" />
                                 Cancel
                             </button>
                             <button
-                                className="bg-white text-[#A23E48] px-4 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 flex items-center gap-2 font-semibold"
+                                className="bg-white text-[#A23E48] px-4 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 flex items-center gap-2 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                                 type="submit"
+                                disabled={isSavingEdit}
                             >
-                                <FaSave className="w-4 h-4" />
-                                Save
+                                {isSavingEdit ? (
+                                    <>
+                                        <span className="inline-block h-4 w-4 rounded-full border-2 border-[#A23E48]/40 border-t-[#A23E48] animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaSave className="w-4 h-4" />
+                                        Save
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -176,6 +192,17 @@ const SortableTaskItem = ({
                                 alt="Edit task"
                             />
                         </button>
+                        <button
+                            className="w-8 h-8 flex items-center justify-center hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out text-white/90"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                confirmDeleteTask(task.id, taskType);
+                            }}
+                            aria-label="Delete task"
+                            title="Delete"
+                        >
+                            <FiTrash2 className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
             )}
@@ -203,7 +230,9 @@ const TaskList = ({
     localDescription,
     setLocalDescription,
     inputRef,
-    textareaRef
+    textareaRef,
+    isSavingEdit,
+    confirmDeleteTask,
 }) => {
     return (
         <DndContext
@@ -240,6 +269,8 @@ const TaskList = ({
                             inputRef={inputRef}
                             textareaRef={textareaRef}
                             taskType={taskType}
+                            isSavingEdit={isSavingEdit}
+                            confirmDeleteTask={confirmDeleteTask}
                         />
                     ))}
                 </div>
@@ -300,6 +331,10 @@ export const Tomorrow = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [error, setError] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isSavingTodayEdit, setIsSavingTodayEdit] = useState(false);
+    const [isSavingTomorrowEdit, setIsSavingTomorrowEdit] = useState(false);
+    const [deleteAlert, setDeleteAlert] = useState({ open: false, taskId: null, list: null, isProcessing: false });
 
     // Separate edit states for today and tomorrow tasks
     const [todayEditIdx, setTodayEditIdx] = useState(null);
@@ -324,6 +359,81 @@ export const Tomorrow = () => {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    /**
+     * Move all 'tomorrow' tasks into 'today' at local midnight
+     * - Persists by updating each task's date and assigning new ranks
+     * - Refreshes local state afterwards
+     */
+    const moveTomorrowTasksToToday = async () => {
+        try {
+            if (!user) return;
+
+            const userId = user.uid;
+
+            // Fetch latest to avoid acting on stale state
+            const [latestToday, latestTomorrow] = await Promise.all([
+                getTodayTasks(userId),
+                getTomorrowTasks(userId),
+            ]);
+
+            if (!latestTomorrow || latestTomorrow.length === 0) {
+                return; // Nothing to move
+            }
+
+            // Determine next rank sequence after current today list
+            let nextRank = (latestToday || []).reduce((max, t) => Math.max(max, t?.rank || 0), 0) + 1;
+
+            // Prepare updates: move every tomorrow task to today with consecutive ranks
+            const updates = latestTomorrow.map((t) => ({ id: t.id, rank: nextRank++, isFinished: t.isFinished }));
+
+            await Promise.all(
+                updates.map(({ id, rank }) => updateTask(id, { date: 'today', rank }))
+            );
+
+            // Refresh lists after move
+            const [updatedToday, updatedTomorrow] = await Promise.all([
+                getTodayTasks(userId),
+                getTomorrowTasks(userId),
+            ]);
+
+            setTodayTasks(updatedToday);
+            setTomorrowTasks(updatedTomorrow);
+            // Reset any edit state referencing old indices
+            setTomorrowEditIdx(null);
+            setTodayEditIdx(null);
+        } catch (e) {
+            console.error('Failed to rollover tasks to today:', e);
+            setError('Failed to rollover tasks to today.');
+        }
+    };
+
+    /**
+     * Schedule rollover at next local midnight and re-arm daily.
+     */
+    useEffect(() => {
+        if (!isAuthResolved || !user) return;
+
+        const scheduleNextMidnight = () => {
+            const now = new Date();
+            const next = new Date(now);
+            // Set to next day 00:00:00.000 local time
+            next.setHours(24, 0, 0, 0);
+            const delay = next.getTime() - now.getTime();
+
+            const timeoutId = setTimeout(async () => {
+                await moveTomorrowTasksToToday();
+                // Re-arm for the following midnight
+                scheduleNextMidnight();
+            }, Math.max(0, delay));
+
+            return timeoutId;
+        };
+
+        const id = scheduleNextMidnight();
+        return () => clearTimeout(id);
+        // Intentionally only depend on auth resolution and user identity to avoid rescheduling on task changes
+    }, [isAuthResolved, user]);
 
     /**
      * Handle authentication state changes
@@ -403,6 +513,7 @@ export const Tomorrow = () => {
      */
     const handleAddTask = async (e) => {
         if (e) e.preventDefault();
+        setIsSaving(true);
         try {
             if (user) {
                 const userId = user.uid;
@@ -430,6 +541,8 @@ export const Tomorrow = () => {
             }
         } catch (error) {
             setError("Failed to add task.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -519,6 +632,7 @@ export const Tomorrow = () => {
         e.preventDefault();
         if (todayEditIdx !== null) {
             try {
+                setIsSavingTodayEdit(true);
                 const taskId = todayTasks[todayEditIdx].id;
                 const updatedData = { title: todayLocalTitle, description: todayLocalDescription };
                 await updateTask(taskId, updatedData);
@@ -530,6 +644,8 @@ export const Tomorrow = () => {
                 setTodayEditIdx(null);
             } catch (error) {
                 setError("Failed to update task.");
+            } finally {
+                setIsSavingTodayEdit(false);
             }
         }
     };
@@ -541,6 +657,7 @@ export const Tomorrow = () => {
         e.preventDefault();
         if (tomorrowEditIdx !== null) {
             try {
+                setIsSavingTomorrowEdit(true);
                 const taskId = tomorrowTasks[tomorrowEditIdx].id;
                 const updatedData = { title: tomorrowLocalTitle, description: tomorrowLocalDescription };
                 await updateTask(taskId, updatedData);
@@ -552,6 +669,8 @@ export const Tomorrow = () => {
                 setTomorrowEditIdx(null);
             } catch (error) {
                 setError("Failed to update task.");
+            } finally {
+                setIsSavingTomorrowEdit(false);
             }
         }
     };
@@ -572,6 +691,49 @@ export const Tomorrow = () => {
         setTomorrowLocalTitle("");
         setTomorrowLocalDescription("");
         setTomorrowEditIdx(null);
+    };
+
+    /**
+     * Delete confirmation flow
+     */
+    const confirmDeleteTask = (taskId, list) => {
+        setDeleteAlert({ open: true, taskId, list, isProcessing: false });
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!deleteAlert.open || !deleteAlert.taskId) return;
+        try {
+            setDeleteAlert((d) => ({ ...d, isProcessing: true }));
+            await deleteTask(deleteAlert.taskId);
+
+            if (deleteAlert.list === 'today') {
+                setTodayTasks((prev) => {
+                    const filtered = prev.filter((t) => t.id !== deleteAlert.taskId);
+                    const reRanked = filtered.map((t, i) => ({ ...t, rank: i + 1 }));
+                    // Persist new ranks best-effort
+                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => {});
+                    return reRanked;
+                });
+            } else if (deleteAlert.list === 'tomorrow') {
+                setTomorrowTasks((prev) => {
+                    const filtered = prev.filter((t) => t.id !== deleteAlert.taskId);
+                    const reRanked = filtered.map((t, i) => ({ ...t, rank: i + 1 }));
+                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => {});
+                    return reRanked;
+                });
+            }
+
+            setDeleteAlert({ open: false, taskId: null, list: null, isProcessing: false });
+        } catch (err) {
+            console.error('Failed to delete task:', err);
+            setError('Failed to delete task.');
+            setDeleteAlert({ open: false, taskId: null, list: null, isProcessing: false });
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        if (deleteAlert.isProcessing) return; // prevent closing while processing
+        setDeleteAlert({ open: false, taskId: null, list: null, isProcessing: false });
     };
 
     /**
@@ -708,6 +870,8 @@ export const Tomorrow = () => {
                                     setLocalDescription={setTodayLocalDescription}
                                     inputRef={todayInputRef}
                                     textareaRef={todayTextareaRef}
+                                    isSavingEdit={isSavingTodayEdit}
+                                    confirmDeleteTask={confirmDeleteTask}
                                 />
                                 <div className="mt-5 flex justify-center items-center">
                                     <button
@@ -751,6 +915,8 @@ export const Tomorrow = () => {
                                     setLocalDescription={setTomorrowLocalDescription}
                                     inputRef={tomorrowInputRef}
                                     textareaRef={tomorrowTextareaRef}
+                                    isSavingEdit={isSavingTomorrowEdit}
+                                    confirmDeleteTask={confirmDeleteTask}
                                 />
                                 <div className="mt-5 flex justify-center items-center">
                                     <button
@@ -787,34 +953,82 @@ export const Tomorrow = () => {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
+                                disabled={isSaving}
                             />
                             <textarea
                                 className="border rounded p-2 mb-2 w-full outline-none"
                                 placeholder="Description (optional)"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
+                                disabled={isSaving}
                             />
                             {error && <p className="text-red-500 text-sm">{error}</p>}
                             <div className="flex justify-end gap-2">
                                 <button
-                                    className="px-4 rounded-lg py-2 bg-gray-300"
+                                    className="px-4 rounded-lg py-2 bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
                                     onClick={() => {
                                         setShowModal(false);
                                         setModalType('');
                                     }}
                                     type="button"
+                                    disabled={isSaving}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className={`px-4 py-2 rounded-lg text-white flex items-center gap-2 justify-center hover:cursor-pointer bg-[#A23E48]`}
+                                    className={`px-4 py-2 rounded-lg text-white flex items-center gap-2 justify-center hover:cursor-pointer bg-[#A23E48] disabled:opacity-60 disabled:cursor-not-allowed`}
                                     type="submit"
+                                    disabled={isLoading || isSaving}
                                 >
-                                    <FaSave className="w-5 h-5" />
-                                    Save
+                                    {isSaving ? (
+                                        <>
+                                            <span className="inline-block h-4 w-4 rounded-full border-2 border-white/60 border-t-white animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaSave className="w-5 h-5" />
+                                            Save
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </form>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {deleteAlert.open && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 shadow-lg w-[360px]">
+                            <h3 className="text-lg font-bold mb-2">Delete task?</h3>
+                            <p className="text-sm text-black/70 mb-4">This action cannot be undone.</p>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    className="font-bold hover:cursor-pointer hover:scale-105 px-4 py-2 rounded-lg bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    onClick={handleDeleteCancel}
+                                    disabled={deleteAlert.isProcessing}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    className="px-4 py-2 font-bold rounded-lg text-white bg-[#A23E48] hover:cursor-pointer hover:scale-105 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                                    onClick={handleDeleteConfirm}
+                                    disabled={deleteAlert.isProcessing}
+                                >
+                                    {deleteAlert.isProcessing ? (
+                                        <>
+                                            <span className="inline-block h-4 w-4 rounded-full border-2 border-white/60 border-t-white animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        'Delete'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
