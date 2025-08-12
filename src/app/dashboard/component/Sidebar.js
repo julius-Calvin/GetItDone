@@ -153,7 +153,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                 <div className="flex flex-col gap-1 flex-grow">
                     {/* Today task - Target icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-gray-100 dark:hover:bg-neutral-700'} text-sm md:text-base`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-900'} text-sm md:text-base`}
                         onClick={() => {
                             setActiveView('today')
                         }}
@@ -174,7 +174,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
 
                     {/* Tomorrow - Calendar icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-gray-100 dark:hover:bg-neutral-700'} text-sm md:text-base`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-800/70 dark:hover:text-white/90'} text-sm md:text-base`}
                         onClick={() => setActiveView('tomorrow')}
                     >
                         <svg

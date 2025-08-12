@@ -144,8 +144,8 @@ function SettingsPanel({ settings, onSave, isLoading }) {
 // PomodoroTimer: client-only timer + task selector (today's tasks only)
 const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) => {
   const router = useRouter();
-  const [ isLoading, setIsLoading] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(false);
+
   // Timer states
   const [mode, setMode] = useState('pomodoro'); // pomodoro, shortBreak, longBreak
   const [timeLeft, setTimeLeft] = useState(() => {
@@ -159,14 +159,14 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
           if (!Number.isNaN(init) && init > 0) return init * 60;
         }
       }
-    } catch {}
+    } catch { }
     return 25 * 60;
   }); // in seconds
   const [isRunning, setIsRunning] = useState(false);
   const runningRef = useRef(false); // decouple running guard from re-render
   const [cycles, setCycles] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  
+
   // Task states (derived from props)
   const [availableTasks, setAvailableTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
@@ -177,7 +177,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
   const [newDescription, setNewDescription] = useState('');
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
-  
+
   // Settings
   const [settings, setSettings] = useState({
     pomodoro: 25,
@@ -187,11 +187,11 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     autoStartPomodoros: false,
     longBreakInterval: 4
   });
-  
+
   // References
   const timerRef = useRef(null);
   const audioRef = useRef(null);
-  
+
   // Initialize audio with diagnostics + fallback beep
   useEffect(() => {
     const AUDIO_PATH = '/sounds/notification.mp3';
@@ -203,7 +203,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
       const logMediaError = () => {
         const mediaErr = el.error;
         if (mediaErr) {
-          const codes = ['MEDIA_ERR_CUSTOM','MEDIA_ERR_ABORTED','MEDIA_ERR_NETWORK','MEDIA_ERR_DECODE','MEDIA_ERR_SRC_NOT_SUPPORTED','MEDIA_ERR_ENCRYPTED'];
+          const codes = ['MEDIA_ERR_CUSTOM', 'MEDIA_ERR_ABORTED', 'MEDIA_ERR_NETWORK', 'MEDIA_ERR_DECODE', 'MEDIA_ERR_SRC_NOT_SUPPORTED', 'MEDIA_ERR_ENCRYPTED'];
           console.error('[PomodoroAudio] Load error', {
             code: mediaErr.code,
             codeLabel: codes[mediaErr.code] || 'UNKNOWN',
@@ -244,7 +244,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
       console.error('[PomodoroAudio] Fallback beep failed', e);
     }
   }, []);
-  
+
   // Handle timer completion (placed before startTimer to avoid TDZ issues)
   const handleTimerComplete = useCallback(() => {
     let attemptedPlay = false;
@@ -304,7 +304,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
 
   // Update timer when mode/settings change
   useEffect(() => {
-    switch(mode) {
+    switch (mode) {
       case 'pomodoro':
         setTimeLeft(settings.pomodoro * 60);
         break;
@@ -325,20 +325,20 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
       startTimer();
     }
   }, [mode, settings.pomodoro, settings.shortBreak, settings.longBreak, settings.autoStartBreaks, settings.autoStartPomodoros, cycles]);
-  
+
   // (handleTimerComplete moved above startTimer)
-  
+
   // Timer control helpers
-  
+
   const pauseTimer = () => {
     setIsRunning(false);
-  runningRef.current = false;
+    runningRef.current = false;
     clearInterval(timerRef.current);
   };
-  
+
   const resetTimer = () => {
     pauseTimer();
-    switch(mode) {
+    switch (mode) {
       case 'pomodoro':
         setTimeLeft(settings.pomodoro * 60);
         break;
@@ -350,21 +350,21 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
         break;
     }
   };
-  
+
   // Format time display
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
-  
+
   // Request notification permission
   const requestNotificationPermission = async () => {
     if ('Notification' in window) {
       await Notification.requestPermission();
     }
   };
-  
+
   useEffect(() => {
     requestNotificationPermission();
   }, []);
@@ -454,8 +454,8 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
       setIsLoading(false);
     }
   };
-  
-  
+
+
   // Handle task completion
   const handleTaskCompletion = async () => {
     if (selectedTaskId) {
@@ -493,11 +493,11 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
   };
 
   // No full-page loading here; parent page handles initial loading
-  
+
   return (
-  <div className="grid md:grid-cols-2 gap-6 md:gap-8 relative w-full transition-theme">
+    <div className="grid md:grid-cols-2 gap-6 md:gap-8 relative w-full transition-theme">
       {/* Timer Section */}
-  <div className="bg-surface-alt dark:bg-[#1f1f1f] rounded-xl p-6 md:p-8 shadow-lg order-2 md:order-1 transition-theme">
+      <div className="bg-surface-alt dark:bg-[#1f1f1f] rounded-xl p-6 md:p-8 shadow-lg order-2 md:order-1 transition-theme">
         {showSettings ? (
           <SettingsPanel
             settings={settings}
@@ -507,20 +507,20 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
         ) : (
           <>
             <div className="flex justify-center space-x-4 mb-8">
-              <button 
-                onClick={() => setMode('pomodoro')} 
+              <button
+                onClick={() => setMode('pomodoro')}
                 className={`px-4 py-2 rounded-full transition-colors ${mode === 'pomodoro' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200'}`}
               >
                 Pomodoro
               </button>
-              <button 
-                onClick={() => setMode('shortBreak')} 
+              <button
+                onClick={() => setMode('shortBreak')}
                 className={`px-4 py-2 rounded-full transition-colors ${mode === 'shortBreak' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200'}`}
               >
                 Short Break
               </button>
-              <button 
-                onClick={() => setMode('longBreak')} 
+              <button
+                onClick={() => setMode('longBreak')}
                 className={`px-4 py-2 rounded-full transition-colors ${mode === 'longBreak' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200'}`}
               >
                 Long Break
@@ -531,37 +531,36 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
               <div className="text-6xl md:text-8xl font-bold text-[#A23E48] mb-6 md:mb-8 font-mono">
                 {formatTime(timeLeft)}
               </div>
-              
+
               <div className="flex space-x-4 mb-6">
-                <button 
+                <button
                   onClick={isRunning ? pauseTimer : startTimer}
                   className="bg-[#A23E48] text-white p-4 rounded-full hover:bg-[#8e3640] transition-colors"
                 >
                   {isRunning ? <FaPause className="w-6 h-6" /> : <FaPlay className="w-6 h-6" />}
                 </button>
-                <button 
+                <button
                   onClick={resetTimer}
                   className="bg-gray-200 dark:bg-neutral-700 p-4 rounded-full hover:bg-gray-300 dark:hover:bg-neutral-600 transition-colors"
                 >
                   <FaRedo className="w-6 h-6 text-gray-700" />
                 </button>
               </div>
-              
+
               <div className="text-center text-gray-600 dark:text-gray-300 mb-6">
                 <p>Completed: {cycles} {cycles === 1 ? 'session' : 'sessions'}</p>
                 {selectedTaskId && !availableTasks.find(t => t.id === selectedTaskId)?.isFinished && (
                   <div className="mt-4 text-center">
                     <p className="font-semibold mb-2">Current Task:</p>
                     <p>{availableTasks.find(task => task.id === selectedTaskId)?.title}</p>
-                    <button 
+                    <button
                       onClick={handleTaskCompletion}
                       disabled={completingId === selectedTaskId}
                       aria-busy={completingId === selectedTaskId}
-                      className={`hover:cursor-pointer mt-2 flex items-center gap-2 px-3 py-2 rounded-md transition-colors mx-auto ${
-                        completingId === selectedTaskId
-                          ? 'bg-[#A23E48]/70 text-white cursor-not-allowed'
-                          : 'bg-[#A23E48] text-white hover:bg-[#93353f]'
-                      }`}
+                      className={`hover:cursor-pointer mt-2 flex items-center gap-2 px-3 py-2 rounded-md transition-colors mx-auto ${completingId === selectedTaskId
+                        ? 'bg-[#A23E48]/70 text-white cursor-not-allowed'
+                        : 'bg-[#A23E48] text-white hover:bg-[#93353f]'
+                        }`}
                     >
                       {completingId === selectedTaskId ? (
                         <FaRedo className="w-4 h-4 animate-spin" />
@@ -573,10 +572,10 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                   </div>
                 )}
               </div>
-              
-              <button 
-                onClick={() => {setShowSettings(true)}}
-                    className="hover:cursor-pointer flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-[#A23E48] transition-colors"
+
+              <button
+                onClick={() => { setShowSettings(true) }}
+                className="hover:cursor-pointer flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-[#A23E48] transition-colors"
               >
                 <IoMdSettings className="w-5 h-5" />
                 Settings
@@ -585,9 +584,9 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
           </>
         )}
       </div>
-      
+
       {/* Tasks Section */}
-  <div className="bg-surface-alt dark:bg-[#1f1f1f] rounded-xl p-6 md:p-8 shadow-lg relative order-1 md:order-2 transition-theme">
+      <div className="bg-surface-alt dark:bg-[#1f1f1f] rounded-xl p-6 md:p-8 shadow-lg relative order-1 md:order-2 transition-theme">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg md:text-xl font-bold text-[#A23E48]">Select a Task to Focus On</h2>
           <button
@@ -599,8 +598,8 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
             + Add Task
           </button>
         </div>
-        
-  {availableTasks.length === 0 ? (
+
+        {availableTasks.length === 0 ? (
           <div className="text-center py-10 text-gray-500 dark:text-gray-400">
             <p>No tasks available</p>
             <p className="mt-2 text-sm">Add one now to start focusing</p>
@@ -626,12 +625,12 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                 const isChecked = task.isFinished || isSelected;
                 const base = 'p-3 rounded-md transition-colors';
                 const interactive = task.isFinished
-                  ? 'bg-gray-100 opacity-50 cursor-not-allowed'
+                  ? 'bg-gray-100 dark:bg-neutral-800/60 opacity-50 cursor-not-allowed'
                   : isSelected
                     ? 'bg-[#A23E48] text-white cursor-pointer'
-                    : 'bg-gray-100 hover:bg-gray-200 cursor-pointer';
+                    : 'bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 cursor-pointer';
                 return (
-                    <div 
+                  <div
                     key={task.id}
                     onClick={() => {
                       if (task.isFinished) return;

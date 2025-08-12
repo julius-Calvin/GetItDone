@@ -43,18 +43,18 @@ import { CSS } from '@dnd-kit/utilities';
  * Generic Sortable Task Item Component
  * Handles both today and tomorrow task items with drag and drop functionality
  */
-const SortableTaskItem = ({ 
-    task, 
-    index, 
-    editIdx, 
-    handleEditClick, 
-    handleSaveClick, 
-    handleCancelButtonClick, 
-    localTitle, 
-    setLocalTitle, 
-    localDescription, 
-    setLocalDescription, 
-    inputRef, 
+const SortableTaskItem = ({
+    task,
+    index,
+    editIdx,
+    handleEditClick,
+    handleSaveClick,
+    handleCancelButtonClick,
+    localTitle,
+    setLocalTitle,
+    localDescription,
+    setLocalDescription,
+    inputRef,
     textareaRef,
     taskType, // 'today' or 'tomorrow'
     isSavingEdit,
@@ -155,7 +155,7 @@ const SortableTaskItem = ({
                             </p>
                         </div>
                     </div>
-                    
+
                     {/* Edit button */}
                     <div className="flex gap-2">
                         <button
@@ -165,13 +165,13 @@ const SortableTaskItem = ({
                                 handleEditClick(index);
                             }}
                         >
-                                <Image
-                                    src="/dashboard/edit-task.svg"
-                                    className="w-5"
-                                    alt="Edit task"
-                                    width={20}
-                                    height={20}
-                                />
+                            <Image
+                                src="/dashboard/edit-task.svg"
+                                className="w-5"
+                                alt="Edit task"
+                                width={20}
+                                height={20}
+                            />
                         </button>
                         <button
                             className="w-8 h-8 flex items-center justify-center hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out text-white/90"
@@ -195,7 +195,7 @@ const SortableTaskItem = ({
  * Generic Task List Component
  * Handles both today and tomorrow task lists with drag and drop functionality
  */
-const TaskList = ({ 
+const TaskList = ({
     tasks,
     taskType,
     editIdx,
@@ -431,7 +431,7 @@ export const Tomorrow = () => {
                 setIsLoading(false);
                 return;
             }
-            
+
             try {
                 const userId = user.uid;
 
@@ -678,14 +678,14 @@ export const Tomorrow = () => {
                     const filtered = prev.filter((t) => t.id !== deleteAlert.taskId);
                     const reRanked = filtered.map((t, i) => ({ ...t, rank: i + 1 }));
                     // Persist new ranks best-effort
-                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => {});
+                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => { });
                     return reRanked;
                 });
             } else if (deleteAlert.list === 'tomorrow') {
                 setTomorrowTasks((prev) => {
                     const filtered = prev.filter((t) => t.id !== deleteAlert.taskId);
                     const reRanked = filtered.map((t, i) => ({ ...t, rank: i + 1 }));
-                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => {});
+                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => { });
                     return reRanked;
                 });
             }
@@ -745,17 +745,17 @@ export const Tomorrow = () => {
     };
 
     return (
-    <div className="flex-1 bg-white">
+        <div className="flex-1 bg-surface transition-theme relative dark:bg-[#1f1f1f]">
             {/* Header Section */}
-        <div className="w-full p-5 md:p-7 bg-white">
+            <div className="w-full p-5 md:p-7 dark:bg-[#161616] transition-theme border-b border-transparent dark:border-neutral-800/80">
                 <div className="flex flex-col gap-2">
-            <span className="text-3xl md:text-4xl font-bold flex flex-row gap-2">
+                    <span className="text-3xl md:text-4xl font-bold flex flex-row gap-2">
                         <h1>Hello,</h1>
                         <h1 className="text-[#A23E48]">
                             {userInfo.displayName ? userInfo.displayName.split(' ')[0] : ''}
                         </h1>
                     </span>
-            <h2 className="text-lg md:text-xl font-bold text-black/30">
+                    <h2 className="text-lg md:text-xl font-bold text-neutral-600 dark:text-neutral-400">
                         Let&apos;s plan your tomorrow!
                     </h2>
                 </div>
@@ -765,7 +765,7 @@ export const Tomorrow = () => {
             <div className="p-4 md:p-5">
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* Today Card */}
-                    <div className="flex-1 bg-white rounded-lg shadow-lg p-5">
+                    <div className="flex-1 dark:bg-[#1f1f1f] rounded-lg shadow-lg p-5 transition-theme card-shadow">
                         <h3 className="text-lg md:text-xl font-bold mb-4">Today, {getCurrentDay()}</h3>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
@@ -809,7 +809,7 @@ export const Tomorrow = () => {
                     </div>
 
                     {/* Tomorrow Card */}
-                    <div className="flex-1 bg-white rounded-lg shadow-lg p-5">
+                    <div className="flex-1 dark:bg-[#1f1f1f] rounded-lg shadow-lg p-5 transition-theme card-shadow">
                         <h3 className="text-lg md:text-xl font-bold mb-4">Tomorrow, {getTomorrowDay()}</h3>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
@@ -857,7 +857,7 @@ export const Tomorrow = () => {
                 {showModal && (
                     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                         <form
-                            className="bg-white rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4"
+                            className="bg-white dark:bg-[#1e1e1e] rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4 transition-theme"
                             onSubmit={handleAddTask}
                         >
                             <h2 className="text-lg font-bold mb-2">
@@ -916,9 +916,9 @@ export const Tomorrow = () => {
                 {/* Delete Confirmation Modal */}
                 {deleteAlert.open && (
                     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 shadow-lg w-[360px]">
+                        <div className="bg-white dark:bg-[#1e1e1e] rounded-lg p-6 shadow-lg w-[360px] transition-theme">
                             <h3 className="text-lg font-bold mb-2">Delete task?</h3>
-                            <p className="text-sm text-black/70 mb-4">This action cannot be undone.</p>
+                            <p className="text-sm text-neutral-600 dark:text-neutral-300 mb-4">This action cannot be undone.</p>
                             <div className="flex justify-end gap-2">
                                 <button
                                     type="button"
