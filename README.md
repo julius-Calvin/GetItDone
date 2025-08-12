@@ -29,29 +29,6 @@ A minimalist, responsive to‑do list application built with Next.js (App Router
 - DnD Kit
 - Tailwind/PostCSS pipeline
 
----
-
-## Project Structure (Excerpt)
-
-```
-.
-├─ package.json
-├─ .env.example
-├─ src/
-│  └─ app/
-│     ├─ layout.js
-│     ├─ api/
-│     │  └─ firebase-config.js
-│     └─ dashboard/
-│        └─ component/
-│           └─ Sidebar.js
-├─ public/
-│  ├─ logo.png
-│  └─ dashboard/
-│     └─ blank-user.svg
-```
-
----
 
 ## Environment Variables
 
