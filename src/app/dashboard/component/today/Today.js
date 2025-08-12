@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { FaPlus, FaSave } from "react-icons/fa";
 import { FaTrashCan } from "react-icons/fa6";
-import { addTask, getTodayTasks, updateTask } from "@/app/api/note-api";
+import { addTask, getTodayTasks, updateTask, rolloverTomorrowTasksToToday } from "@/app/api/note-api";
 import { MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import { FiTrash2 } from "react-icons/fi";
@@ -282,6 +282,52 @@ export const Today = () => {
             fetchTasks();
         }
     }, [user, isAuthResolved]);
+
+    // Schedule daily rollover at local midnight while Today component is mounted
+    useEffect(() => {
+        if (!isAuthResolved || !user) return;
+
+        // Track last rollover date in localStorage to prevent duplicate moves if component remounts shortly after midnight
+        const lastKey = 'lastTomorrowRolloverDate';
+
+        const scheduleNextMidnight = () => {
+            const now = new Date();
+            const next = new Date(now);
+            next.setHours(24, 0, 0, 0); // next local midnight
+            const delay = next.getTime() - now.getTime();
+            const timeoutId = setTimeout(async () => {
+                try {
+                    const todayStr = new Date().toDateString();
+                    const last = (typeof window !== 'undefined') ? localStorage.getItem(lastKey) : null;
+                    if (last !== todayStr) {
+                        await rolloverTomorrowTasksToToday(user.uid);
+                        if (typeof window !== 'undefined') {
+                            localStorage.setItem(lastKey, todayStr);
+                        }
+                        const refreshed = await getTodayTasks(user.uid);
+                        setTasks(refreshed || []);
+                    }
+                } catch (e) {
+                    console.error('Midnight rollover failed:', e);
+                }
+                scheduleNextMidnight();
+            }, Math.max(0, delay));
+            return timeoutId;
+        };
+        // Also attempt a rollover immediately if day changed while app closed
+        try {
+            const todayStr = new Date().toDateString();
+            const last = (typeof window !== 'undefined') ? localStorage.getItem(lastKey) : null;
+            if (last !== todayStr) {
+                rolloverTomorrowTasksToToday(user.uid).then(() => {
+                    if (typeof window !== 'undefined') localStorage.setItem(lastKey, todayStr);
+                    getTodayTasks(user.uid).then(data => setTasks(data || []));
+                }).catch(() => {});
+            }
+        } catch { /* ignore */ }
+        const id = scheduleNextMidnight();
+        return () => clearTimeout(id);
+    }, [isAuthResolved, user]);
 
     // Handle edit button click
     const handleEditClick = (idx) => {

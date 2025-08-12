@@ -48,7 +48,6 @@ const SortableTaskItem = ({
     index, 
     editIdx, 
     handleEditClick, 
-    handleTaskFinished, 
     handleSaveClick, 
     handleCancelButtonClick, 
     localTitle, 
@@ -70,7 +69,7 @@ const SortableTaskItem = ({
         isDragging,
     } = useSortable({
         id: `${taskType}-${task.id}`,
-        disabled: task?.isFinished || editIdx === index
+        disabled: editIdx === index
     });
 
     const style = {
@@ -82,7 +81,7 @@ const SortableTaskItem = ({
         <div
             ref={setNodeRef}
             style={style}
-            className={`${task?.isFinished ? 'opacity-50 ' : ''} bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02]'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
+            className={`bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
         >
             {editIdx === index ? (
                 // Edit form - centered layout
@@ -141,35 +140,14 @@ const SortableTaskItem = ({
                 // Normal display layout
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        {/* Checkbox for task completion */}
-                        <div className="w-5 h-5 flex items-center justify-center">
-                            <button
-                                className="hover:cursor-pointer"
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleTaskFinished(e, index);
-                                }}
-                            >
-                                {task?.isFinished ? (
-                                    <ImCheckboxChecked />
-                                ) : (
-                                    <MdOutlineCheckBoxOutlineBlank className="w-5 h-5" />
-                                )}
-                            </button>
+                        {/* Drag handle */}
+                        <div
+                            {...attributes}
+                            {...listeners}
+                            className="w-4 h-4 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing"
+                        >
+                            <BsGripVertical className="w-4 h-4" />
                         </div>
-                        
-                        {/* Drag handle for unfinished tasks */}
-                        {!task?.isFinished && (
-                            <div
-                                {...attributes}
-                                {...listeners}
-                                className="w-4 h-4 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing"
-                            >
-                                <BsGripVertical className="w-4 h-4" />
-                            </div>
-                        )}
-                        
                         <div>
                             <h4 className="font-bold">{task.title}</h4>
                             <p className={`${task.description ? "" : "italic text-white/50"} text-sm opacity-90`}>
@@ -218,14 +196,10 @@ const SortableTaskItem = ({
  * Handles both today and tomorrow task lists with drag and drop functionality
  */
 const TaskList = ({ 
-    tasks, 
-    setTasks, 
-    handleDragEnd, 
-    taskType, 
-    editIdx, 
-    modalType,
+    tasks,
+    taskType,
+    editIdx,
     handleEditClick,
-    handleTaskFinished,
     handleSaveClick,
     handleCancelButtonClick,
     localTitle,
@@ -236,51 +210,44 @@ const TaskList = ({
     textareaRef,
     isSavingEdit,
     confirmDeleteTask,
-}) => {
-    return (
-        <DndContext
-            sensors={useSensors(
-                useSensor(PointerSensor, {
-                    activationConstraint: { distance: 8 },
-                }),
-                useSensor(KeyboardSensor, {
-                    coordinateGetter: sortableKeyboardCoordinates,
-                })
-            )}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+    sensors,
+    handleDragEnd,
+}) => (
+    <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+    >
+        <SortableContext
+            items={tasks.map(task => `${taskType}-${task.id}`)}
+            strategy={verticalListSortingStrategy}
         >
-            <SortableContext 
-                items={tasks.map(task => `${taskType}-${task.id}`)} 
-                strategy={verticalListSortingStrategy}
-            >
-                <div className="space-y-4">
-                    {tasks.map((task, index) => (
-                        <SortableTaskItem
-                            key={task.id}
-                            task={task}
-                            index={index}
-                            editIdx={editIdx}
-                            handleEditClick={handleEditClick}
-                            handleTaskFinished={handleTaskFinished}
-                            handleSaveClick={handleSaveClick}
-                            handleCancelButtonClick={handleCancelButtonClick}
-                            localTitle={localTitle}
-                            setLocalTitle={setLocalTitle}
-                            localDescription={localDescription}
-                            setLocalDescription={setLocalDescription}
-                            inputRef={inputRef}
-                            textareaRef={textareaRef}
-                            taskType={taskType}
-                            isSavingEdit={isSavingEdit}
-                            confirmDeleteTask={confirmDeleteTask}
-                        />
-                    ))}
-                </div>
-            </SortableContext>
-        </DndContext>
-    );
-};
+            <div className="space-y-4">
+                {tasks.map((task, index) => (
+                    <SortableTaskItem
+                        key={task.id}
+                        task={task}
+                        index={index}
+                        editIdx={editIdx}
+                        handleEditClick={handleEditClick}
+                        // completion functionality removed
+                        handleSaveClick={handleSaveClick}
+                        handleCancelButtonClick={handleCancelButtonClick}
+                        localTitle={localTitle}
+                        setLocalTitle={setLocalTitle}
+                        localDescription={localDescription}
+                        setLocalDescription={setLocalDescription}
+                        inputRef={inputRef}
+                        textareaRef={textareaRef}
+                        taskType={taskType}
+                        isSavingEdit={isSavingEdit}
+                        confirmDeleteTask={confirmDeleteTask}
+                    />
+                ))}
+            </div>
+        </SortableContext>
+    </DndContext>
+);
 
 /**
  * No Task Card Component
@@ -354,13 +321,10 @@ export const Tomorrow = () => {
     const tomorrowTextareaRef = useRef(null);
 
     // DnD sensors configuration
+    // Stable sensors instance (length/order never changes)
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: { distance: 8 },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
     /**
@@ -742,56 +706,7 @@ export const Tomorrow = () => {
     /**
      * Toggle check mark to finish a today task
      */
-    const handleTodayTaskFinished = async (e, idx) => {
-        e.preventDefault();
-        try {
-            const taskId = todayTasks[idx].id;
-            const isFinished = todayTasks[idx].isFinished;
-            const updatedData = {
-                ...todayTasks[idx],
-                isFinished: !isFinished,
-                rank: isFinished ? todayTasks[idx].rank : todayTasks.length + 1,
-            };
-
-            await updateTask(taskId, updatedData);
-
-            setTodayTasks((prevTasks) => {
-                const updatedTasks = [...prevTasks];
-                updatedTasks[idx] = updatedData;
-                const sortedTasks = updatedTasks.sort((a, b) => a.rank - b.rank);
-                return sortedTasks;
-            });
-        } catch (error) {
-            console.error("Error marking task as complete:", error);
-        }
-    };
-
-    /**
-     * Toggle check mark to finish a tomorrow task
-     */
-    const handleTomorrowTaskFinished = async (e, idx) => {
-        e.preventDefault();
-        try {
-            const taskId = tomorrowTasks[idx].id;
-            const isFinished = tomorrowTasks[idx].isFinished;
-            const updatedData = {
-                ...tomorrowTasks[idx],
-                isFinished: !isFinished,
-                rank: isFinished ? tomorrowTasks[idx].rank : tomorrowTasks.length + 1,
-            };
-
-            await updateTask(taskId, updatedData);
-
-            setTomorrowTasks((prevTasks) => {
-                const updatedTasks = [...prevTasks];
-                updatedTasks[idx] = updatedData;
-                const sortedTasks = updatedTasks.sort((a, b) => a.rank - b.rank);
-                return sortedTasks;
-            });
-        } catch (error) {
-            console.error("Error marking task as complete:", error);
-        }
-    };
+    // Completion toggle removed
 
     // Update local state when edit index changes for today tasks
     useEffect(() => {
@@ -858,13 +773,10 @@ export const Tomorrow = () => {
                             <div className="flex flex-col">
                                 <TaskList
                                     tasks={todayTasks}
-                                    setTasks={setTodayTasks}
-                                    handleDragEnd={handleTodayDragEnd}
                                     taskType="today"
                                     editIdx={todayEditIdx}
-                                    modalType={modalType}
                                     handleEditClick={handleTodayEditClick}
-                                    handleTaskFinished={handleTodayTaskFinished}
+                                    // completion removed
                                     handleSaveClick={handleTodaySaveClick}
                                     handleCancelButtonClick={handleTodayCancelButtonClick}
                                     localTitle={todayLocalTitle}
@@ -875,6 +787,8 @@ export const Tomorrow = () => {
                                     textareaRef={todayTextareaRef}
                                     isSavingEdit={isSavingTodayEdit}
                                     confirmDeleteTask={confirmDeleteTask}
+                                    sensors={sensors}
+                                    handleDragEnd={handleTodayDragEnd}
                                 />
                                 <div className="mt-5 flex justify-center items-center">
                                     <button
@@ -903,13 +817,10 @@ export const Tomorrow = () => {
                             <div className="flex flex-col">
                                 <TaskList
                                     tasks={tomorrowTasks}
-                                    setTasks={setTomorrowTasks}
-                                    handleDragEnd={handleTomorrowDragEnd}
                                     taskType="tomorrow"
                                     editIdx={tomorrowEditIdx}
-                                    modalType={modalType}
                                     handleEditClick={handleTomorrowEditClick}
-                                    handleTaskFinished={handleTomorrowTaskFinished}
+                                    // completion removed
                                     handleSaveClick={handleTomorrowSaveClick}
                                     handleCancelButtonClick={handleTomorrowCancelButtonClick}
                                     localTitle={tomorrowLocalTitle}
@@ -920,6 +831,8 @@ export const Tomorrow = () => {
                                     textareaRef={tomorrowTextareaRef}
                                     isSavingEdit={isSavingTomorrowEdit}
                                     confirmDeleteTask={confirmDeleteTask}
+                                    sensors={sensors}
+                                    handleDragEnd={handleTomorrowDragEnd}
                                 />
                                 <div className="mt-5 flex justify-center items-center">
                                     <button
