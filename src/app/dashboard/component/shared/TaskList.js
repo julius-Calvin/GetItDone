@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -130,7 +131,7 @@ const SortableTaskItem = ({
               className="w-8 h-8 flex items-center justify-center hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out"
               onClick={onEdit}
             >
-              <img src="/dashboard/edit-task.svg" className="w-5" alt="Edit task" />
+              <Image src="/dashboard/edit-task.svg" className="w-5" alt="Edit task" width={20} height={20} />
             </button>
           </div>
         </div>
@@ -148,13 +149,17 @@ export const TaskList = ({ tasks, setTasks, editIdx, setEditIdx, sensors, onDrag
 
   const unfinishedTask = tasks.filter((task) => !task.isFinished);
 
+  // When edit index changes, derive current unfinished tasks from source list (tasks) to avoid stale data
   useEffect(() => {
-    if (editIdx !== null && unfinishedTask[editIdx]) {
-      setLocalTitle(unfinishedTask[editIdx]?.title || '');
-      setLocalDescription(unfinishedTask[editIdx]?.description || '');
-      inputRef.current?.focus();
+    if (editIdx !== null) {
+      const currentUnfinished = tasks.filter((task) => !task.isFinished);
+      if (currentUnfinished[editIdx]) {
+        setLocalTitle(currentUnfinished[editIdx]?.title || '');
+        setLocalDescription(currentUnfinished[editIdx]?.description || '');
+        inputRef.current?.focus();
+      }
     }
-  }, [editIdx]);
+  }, [editIdx, tasks]);
 
   const handleEditClick = (idx) => {
     setEditIdx(idx);

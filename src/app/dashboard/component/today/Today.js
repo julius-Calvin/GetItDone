@@ -19,6 +19,7 @@ import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import TaskList from "@/app/dashboard/component/shared/TaskList";
+import Image from 'next/image';
 import { MdOutlineVisibilityOff } from "react-icons/md";
 import { useRouter } from "next/navigation";
 
@@ -150,10 +151,12 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
                                 handleEditClick(index);
                             }}
                         >
-                            <img
+                            <Image
                                 src="/dashboard/edit-task.svg"
                                 className="w-5"
                                 alt="Edit task"
+                                width={20}
+                                height={20}
                             />
                         </button>
                     </div>
@@ -582,7 +585,7 @@ export const Today = () => {
                         </h1>
                     </span>
                     <h2 className="text-xl font-bold text-black/30">
-                        Let's finish some things today!
+                        Let&apos;s finish some things today!
                     </h2>
                 </div>
             </div>

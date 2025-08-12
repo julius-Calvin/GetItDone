@@ -208,7 +208,22 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     };
   }, []);
   
-  // Update timer when mode changes
+  const startTimer = useCallback(() => {
+    if (isRunning) return;
+    setIsRunning(true);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          handleTimerComplete();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [isRunning, handleTimerComplete]);
+
+  // Update timer when mode/settings change
   useEffect(() => {
     switch(mode) {
       case 'pomodoro':
@@ -223,14 +238,13 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     }
     setIsRunning(false);
     if (timerRef.current) clearInterval(timerRef.current);
-    
-    // Auto start timers based on settings
+
     if ((mode === 'shortBreak' || mode === 'longBreak') && settings.autoStartBreaks) {
       startTimer();
     } else if (mode === 'pomodoro' && settings.autoStartPomodoros && cycles > 0) {
       startTimer();
     }
-  }, [mode, settings.pomodoro, settings.shortBreak, settings.longBreak, settings.autoStartBreaks, settings.autoStartPomodoros]);
+  }, [mode, settings.pomodoro, settings.shortBreak, settings.longBreak, settings.autoStartBreaks, settings.autoStartPomodoros, cycles, startTimer]);
   
   // Handle timer completion
   const handleTimerComplete = useCallback(() => {
@@ -262,22 +276,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     }
   }, [mode, cycles, settings.longBreakInterval]);
   
-  // Timer functions
-  const startTimer = () => {
-    if (isRunning) return;
-    
-    setIsRunning(true);
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          handleTimerComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
+  // Timer control helpers
   
   const pauseTimer = () => {
     setIsRunning(false);

@@ -3,6 +3,7 @@
 // React and Next.js imports
 import { useState, useEffect, useRef } from "react";
 import React from "react";
+import Image from 'next/image';
 
 // Firebase imports
 import { auth } from "@/app/api/firebase-config";
@@ -186,11 +187,13 @@ const SortableTaskItem = ({
                                 handleEditClick(index);
                             }}
                         >
-                            <img
-                                src="/dashboard/edit-task.svg"
-                                className="w-5"
-                                alt="Edit task"
-                            />
+                                <Image
+                                    src="/dashboard/edit-task.svg"
+                                    className="w-5"
+                                    alt="Edit task"
+                                    width={20}
+                                    height={20}
+                                />
                         </button>
                         <button
                             className="w-8 h-8 flex items-center justify-center hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out text-white/90"
@@ -838,7 +841,7 @@ export const Tomorrow = () => {
                         </h1>
                     </span>
                     <h2 className="text-xl font-bold text-black/30">
-                        Let's plan your tomorrow!
+                        Let&apos;s plan your tomorrow!
                     </h2>
                 </div>
             </div>
