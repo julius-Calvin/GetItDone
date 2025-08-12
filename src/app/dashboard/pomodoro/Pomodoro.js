@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { FaPlay, FaPause, FaRedo, FaCheck } from 'react-icons/fa';
 import { IoMdSettings } from 'react-icons/io';
 import { MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
-import { updateTask } from '../../api/note-api';
+import { updateTask, addTask } from '../../api/note-api';
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 
@@ -142,7 +142,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
 }
 
 // PomodoroTimer: client-only timer + task selector (today's tasks only)
-const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false }) => {
+const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) => {
   const router = useRouter();
   const [ isLoading, setIsLoading] = useState(false);
   
@@ -170,6 +170,12 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false }) => {
   const [availableTasks, setAvailableTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [completingId, setCompletingId] = useState(null);
+  // Add task states
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState('');
   
   // Settings
   const [settings, setSettings] = useState({
@@ -329,6 +335,39 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false }) => {
     const todays = (Array.isArray(tasks) ? tasks : []).filter(t => (t?.date === 'today') || !('date' in t));
     setAvailableTasks(todays);
   }, [tasks]);
+
+  const handleOpenAdd = () => {
+    setNewTitle('');
+    setNewDescription('');
+    setAddError('');
+    setShowAddModal(true);
+  };
+
+  const handleAddTask = async (e) => {
+    e?.preventDefault();
+    if (!userId) {
+      setAddError('Not authenticated');
+      return;
+    }
+    if (!newTitle.trim()) {
+      setAddError('Title required');
+      return;
+    }
+    setAdding(true);
+    setAddError('');
+    try {
+      const created = await addTask(userId, { title: newTitle.trim(), description: newDescription.trim(), date: 'today' });
+      setAvailableTasks(prev => [...prev, { ...created, isFinished: false, rank: (prev.length || 0) + 1 }]);
+      setShowAddModal(false);
+      // Auto-select newly added task for focus
+      setSelectedTaskId(created.id);
+    } catch (err) {
+      console.error('Failed to add task', err);
+      setAddError('Failed to add task');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   // Save settings and finish loading state
   const handleSaveSettings = async (nextSettings) => {
@@ -496,13 +535,31 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false }) => {
       </div>
       
       {/* Tasks Section */}
-      <div className="bg-white rounded-xl p-8 shadow-lg">
-        <h2 className="text-xl font-bold text-[#A23E48] mb-6">Select a Task to Focus On</h2>
+      <div className="bg-white rounded-xl p-8 shadow-lg relative">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-[#A23E48]">Select a Task to Focus On</h2>
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="hover:cursor-pointer px-4 py-2 rounded-md bg-[#A23E48] text-white text-sm font-semibold hover:bg-[#8e3640] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={adding}
+          >
+            + Add Task
+          </button>
+        </div>
         
   {availableTasks.length === 0 ? (
           <div className="text-center py-10 text-gray-500">
             <p>No tasks available</p>
-            <p className="mt-2 text-sm">Create tasks in Today or Tomorrow sections</p>
+            <p className="mt-2 text-sm">Add one now to start focusing</p>
+            <button
+              type="button"
+              onClick={handleOpenAdd}
+              className="hover:scale-105 transition-all duration-300 ease-in-out mt-4 hover:cursor-pointer px-4 py-2 rounded-md bg-[#A23E48] text-white text-sm font-semibold hover:bg-[#8e3640] "
+              disabled={adding}
+            >
+              + Add Task
+            </button>
           </div>
         ) : (
           <div className="space-y-3 max-h-[400px] overflow-y-auto">
@@ -559,6 +616,56 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false }) => {
           </div>
         )}
       </div>
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <form onSubmit={handleAddTask} className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm flex flex-col gap-4">
+            <h2 className="font-bold text-lg text-[#A23E48]">Add Focus Task</h2>
+            {addError && <div className="text-sm text-red-600 bg-red-100 p-2 rounded">{addError}</div>}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Title</label>
+              <input
+                className="border rounded px-3 py-2 outline-none focus:ring-2 focus:ring-[#A23E48]/40"
+                value={newTitle}
+                onChange={e => setNewTitle(e.target.value)}
+                placeholder="Task title"
+                maxLength={120}
+                disabled={adding}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Description</label>
+              <textarea
+                className="border rounded px-3 py-2 outline-none resize-none focus:ring-2 focus:ring-[#A23E48]/40"
+                value={newDescription}
+                onChange={e => setNewDescription(e.target.value)}
+                placeholder="Optional description"
+                rows={3}
+                maxLength={500}
+                disabled={adding}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-sm font-medium hover:cursor-pointer disabled:opacity-60"
+                disabled={adding}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded bg-[#A23E48] text-white text-sm font-semibold hover:bg-[#8e3640] hover:cursor-pointer disabled:opacity-60 flex items-center gap-2"
+                disabled={adding}
+              >
+                {adding && <span className="inline-block h-4 w-4 rounded-full border-2 border-white/60 border-t-white animate-spin" />}
+                {adding ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
       {/* Floating Eye Button (open) */}
       <button
         onClick={() => router.push('/dashboard')}

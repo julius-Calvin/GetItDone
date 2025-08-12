@@ -1,4 +1,3 @@
-
 'use client'
 
 import { auth } from "./firebase-config";
@@ -11,7 +10,8 @@ import {
     signInWithPopup,
     getAuth,
     sendPasswordResetEmail,
-    onAuthStateChanged
+    onAuthStateChanged,
+    updateProfile
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -54,28 +54,61 @@ export const useAuth = () => useContext(AuthContext);
  */
 
 /* Register user */
-export const registerUser = async (email, password) => {
+export const registerUser = async (email, password, username, photoURL) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+        // Set initial profile (username + optional photo)
+        try {
+            await updateProfile(user, {
+                displayName: username || email.split('@')[0],
+                photoURL: photoURL || ''
+            });
+        } catch (e) {
+            // Silently continue; profile update failure shouldn't block account creation
+            console.warn('Profile update failed', e);
+        }
+
+    // Resolve base URL
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!baseUrl && typeof window !== 'undefined') {
+      baseUrl = window.location.origin;
+    }
+    if (!baseUrl) {
+      baseUrl = 'http://localhost:3000';
+    }
+    // Ensure protocol + no trailing slash
+    if (!/^https?:\/\//i.test(baseUrl)) {
+      baseUrl = `https://${baseUrl}`;
+    }
+    baseUrl = baseUrl.replace(/\/$/, '');
+
+    const actionCodeSettings = {
+      url: `${baseUrl}/auth/sign-in?email=${encodeURIComponent(auth.currentUser.email)}`,
+      handleCodeInApp: true,
+    };
+
+    await sendEmailVerification(user, actionCodeSettings);
+
+    return { success: true, user, emailVerificationSent: true };
+  } catch (error) {
+    return { success: false, error: error.code };
+  }
+};
+
+/**
+ * Update current user's profile (displayName & photoURL)
+ * @param {object} data { displayName?: string, photoURL?: string }
+ */
+export const updateUserProfile = async (data) => {
+    const user = auth.currentUser;
+    if (!user) return { success: false, error: 'auth/no-current-user' };
     try {
-        // Create new user account with firebase auth
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        const actionCodeSettings = {
-            url: `${process.env.NEXT_PUBLIC_LOCAL_URL}/auth/sign-in?email` + auth.currentUser.email,
-            handleCodeInApp: true
-        }; // Will direct to page again
-        await sendEmailVerification(user, actionCodeSettings);
-
-        return {
-            success: true,
-            user: user,
-            emailVerificationSent: true
-        }
-
-    } catch (error) { // Handle error
-        return {
-            success: false,
-            error: error.code
-        }
+        await updateProfile(user, data);
+        return { success: true, user };
+    } catch (error) {
+        return { success: false, error: error.code };
     }
 };
 
@@ -157,8 +190,9 @@ export const googleLogin = async () => {
 
 export const forgetPassword = async (email) => {
     try {
+        const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
         const actionCodeSettings = {
-             url: `${process.env.NEXT_PUBLIC_LOCAL_URL}/auth/sign-in?email=` + email,
+            url: `${baseUrl}/auth/sign-in?email=${encodeURIComponent(email)}`,
             handleCodeInApp: true,
         };
         await sendPasswordResetEmail(auth, email, actionCodeSettings);

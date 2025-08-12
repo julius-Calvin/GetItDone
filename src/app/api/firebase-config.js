@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 
 const firebaseConfig = {
@@ -16,10 +17,19 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  // Basic sanity check (keys here are public anyway in a web app)
+  const missing = Object.entries(firebaseConfig).filter(([_, v]) => !v).map(([k]) => k);
+  if (missing.length) {
+    console.warn('[FirebaseConfig] Missing env vars:', missing.join(', '));
+  }
+  console.log('[FirebaseConfig] projectId:', firebaseConfig.projectId, 'storageBucket:', firebaseConfig.storageBucket);
+}
 export const auth = getAuth(app);
 
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 
 

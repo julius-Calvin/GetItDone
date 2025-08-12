@@ -16,6 +16,7 @@ export default function RegisterPage() {
     // State for data
     const [formData, setFormData] = useState({
         email: '',
+        username: '',
         password: '',
         confirmPassword: ''
     });
@@ -63,13 +64,17 @@ export default function RegisterPage() {
         event.preventDefault();
         setError("");
         setMessage("");
-        const { email, password, confirmPassword } = formData
+    const { email, username, password, confirmPassword } = formData
 
         // Check if fields are empty
-        if (!email || !password || !confirmPassword) {
+        if (!email || !username || !password || !confirmPassword) {
             setError(`All fields are required`);
             return;
         };
+        if (username.length < 3) {
+            setError("Username must be at least 3 characters");
+            return;
+        }
         // Check if password length < 8
         if (password.length < 8) {
             setError("Password must be at least 8 characters");
@@ -85,10 +90,10 @@ export default function RegisterPage() {
 
         // register user
         try {
-            const result = await registerUser(email, password);
+            const result = await registerUser(email, password, username);
 
             if (result.success && result.emailVerificationSent) {
-                setMessage("Account successfully created!")
+                setMessage("Account successfully created! Check your email for email verification!")
                 setTimeout(() => {
                     router.push('/auth/sign-in')
                 }, 10000)
@@ -109,7 +114,7 @@ export default function RegisterPage() {
     return (
         <div className="flex items-center justify-center min-h-screen ">
             <form onSubmit={formSubmit}>
-                <div className="flex flex-col bg-white p-10 rounded-lg card-shadow min-w-sm gap-5">
+                <div className="flex flex-col bg-white p-10 rounded-lg card-shadow min-w-sm max-w-lg gap-5">
                     <h1 className="text-center font-bold">WELCOME</h1>
                     {/* Alert to show message and error */}
                     {message && (
@@ -124,6 +129,18 @@ export default function RegisterPage() {
                     )}
                     {/*Input fields*/}
                     <div className="flex flex-col gap-2">
+                        <div className="flex flex-col">
+                            <label>Username</label>
+                            <input
+                                name="username"
+                                type="text"
+                                value={formData.username}
+                                onChange={handleInputChange}
+                                className="input-fields"
+                                placeholder="Choose a username"
+                                required
+                            />
+                        </div>
                         <div className="flex flex-col">
                             <label>Email</label>
                             <input
@@ -178,12 +195,6 @@ export default function RegisterPage() {
                                 </button>
                             </div>
                         </div>
-                        <Link
-                            href="/auth/forget-password"
-                            className="text-sm hover:underline text-[#A23E48] cursor-pointer text-right"
-                        >
-                            Forget Password?
-                        </Link>
                     </div>
 
                     {/*Button Sign in and Google Sign in*/}

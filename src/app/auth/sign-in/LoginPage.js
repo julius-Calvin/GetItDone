@@ -71,7 +71,7 @@ export default function LoginPage () {
 
             if(result.success) {
                 setMessage("Signing in");
-                window.location.href='/';
+                window.location.href='/dashboard';
             } else {
                 setError(result.error || "Login failed");
             }

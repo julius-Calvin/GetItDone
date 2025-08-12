@@ -13,7 +13,7 @@ export default function Page() {
   const [tasks, setTasks] = useState([])
   const [dataLoading, setDataLoading] = useState(false)
   const { user, loading: authLoading } = useAuth()
-  
+
   useEffect(() => {
     const fetchTasks = async () => {
       if (authLoading) return; // Wait for auth to resolve to avoid double loading
@@ -40,15 +40,15 @@ export default function Page() {
 
     fetchTasks()
   }, [user, authLoading])
-  
-  
+
+
   const showLoading = authLoading || dataLoading
   return (
-  showLoading ? <LoadingPage /> : (
-  <div className="p-5 md:p-10">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[#A23E48]">Focus Time</h1>
-      <PomodoroTimer tasks={tasks} isLoading={showLoading} />
-    </div>
-  )
+    showLoading ? <LoadingPage /> : (
+      <div className="p-5 md:p-10">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[#A23E48]">Focus Time</h1>
+        <PomodoroTimer tasks={tasks} isLoading={showLoading} userId={user?.uid} />
+      </div>
+    )
   )
 }

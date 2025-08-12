@@ -237,7 +237,22 @@ export const Today = () => {
             }
         });
 
-        return () => unsubscribe();
+        // Listen for profile updates from Sidebar
+        const handleProfileUpdated = (e) => {
+            if (e.detail?.displayName) {
+                setUserInfo(prev => ({ ...prev, displayName: e.detail.displayName }));
+            }
+        };
+        if (typeof window !== 'undefined') {
+            window.addEventListener('profile-updated', handleProfileUpdated);
+        }
+
+        return () => {
+            unsubscribe();
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('profile-updated', handleProfileUpdated);
+            }
+        };
     }, []);
 
     useEffect(() => {
