@@ -43,7 +43,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
         event.preventDefault();
         setError(null); // Clear any previous errors
         setIsSigningOut(true);
-        setIsLoading(true); 
+        setIsLoading(true);
         try {
             const result = await logoutUser();
             // Handle case when logout fails
@@ -63,8 +63,8 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
     };
 
     const openEdit = () => {
-    setEditData({ displayName: userInfo.displayName || '' });
-    setShowEditModal(true);
+        setEditData({ displayName: userInfo.displayName || '' });
+        setShowEditModal(true);
     };
 
     const handleProfileUpdate = async (e) => {
@@ -72,11 +72,11 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
         setUpdating(true);
         setUpdateError('');
         setUpdateSuccess('');
-    let { displayName } = editData;
+        let { displayName } = editData;
         const startTs = Date.now();
         console.log('[ProfileUpdate] Started', { displayNameInitial: displayName });
         // Fallback safety: force clear after 20s no matter what
-        const safetyTimer = setTimeout(()=> {
+        const safetyTimer = setTimeout(() => {
             console.warn('[ProfileUpdate] Safety timer triggered; forcing updating=false');
             setUpdating(false);
         }, 20000);
@@ -84,18 +84,18 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
             console.log('[ProfileUpdate] Calling updateUserProfile');
             // Add a 12s timeout around profile update to avoid indefinite hanging
             const result = await Promise.race([
-        updateUserProfile({ displayName: displayName || null, photoURL: null }),
-                new Promise((_, reject)=> setTimeout(()=> reject(new Error('Profile update timed out')), 12000))
+                updateUserProfile({ displayName: displayName || null, photoURL: null }),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Profile update timed out')), 12000))
             ]);
             console.log('[ProfileUpdate] updateUserProfile result', result);
             if (result.success) {
-        setUserInfo({ displayName, photoURL: '' });
-                try { auth.currentUser?.reload?.(); } catch(e) { /* ignore */ }
+                setUserInfo({ displayName, photoURL: '' });
+                try { auth.currentUser?.reload?.(); } catch (e) { /* ignore */ }
                 if (typeof window !== 'undefined') {
                     window.dispatchEvent(new CustomEvent('profile-updated', { detail: { displayName } }));
                 }
                 setUpdateSuccess('Profile updated');
-                setTimeout(()=> setShowEditModal(false), 800);
+                setTimeout(() => setShowEditModal(false), 800);
             } else {
                 setUpdateError(result.error || 'Update failed');
             }
@@ -109,21 +109,22 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
         }
     };
 
-        return (
-        <div className="flex flex-col min-h-screen items-center bg-[#F3F1F1] relative w-60 md:w-64 flex-shrink-0 shadow md:shadow-none">
-            <div className="p-2 min-w-7 flex flex-col h-full w-full">
-                                {/* Mobile close */}
-                                                                {mobile && (
-                                                                    <div className="md:hidden flex justify-end mb-2">
-                                                                        <button 
-                                                                            onClick={() => setActiveView(activeView)} 
-                                                                            aria-label="Close navigation menu" 
-                                                                            className="p-2 rounded-md bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 shadow"
-                                                                        >
-                                                                            <RxCross2 className="w-4 h-4" />
-                                                                        </button>
-                                                                    </div>
-                                                                )}
+    return (
+        <div className="flex flex-col min-h-screen bg-[#F3F1F1] relative w-60 md:w-64 flex-shrink-0 shadow md:shadow-none">
+            {/* Scrollable content area with bottom padding to avoid overlap with fixed sign-out */}
+            <div className="p-2 min-w-7 flex flex-col h-full w-full pb-24 overflow-y-auto">
+                {/* Mobile close */}
+                {mobile && (
+                    <div className="md:hidden flex justify-end mb-2">
+                        <button
+                            onClick={() => setActiveView(activeView)}
+                            aria-label="Close navigation menu"
+                            className="p-2 rounded-md bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 shadow"
+                        >
+                            <RxCross2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
                 {/* Profile Section*/}
                 <div className="flex flex-row p-3 items-center mb-6 relative w-full gap-3">
                     <div className="relative w-6 h-6 shrink-0">
@@ -233,7 +234,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                         <p className="font-bold">Tomorrow</p>
                     </div>
                 </div>
-                
+
                 {/* Error Display */}
                 {error && (
                     <div className="mt-2 mb-4 w-full px-3">
@@ -242,27 +243,17 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                         </div>
                     </div>
                 )}
-                
-                {/* Sign Out Button - fallback if dropdown hidden */}
-                                <div className="mt-auto mb-6 w-full px-3 hidden md:block">
-                    <button
-                        onClick={signOutUser}
-                        className="text-[#F3F1F1] font-bold button-bg p-3 text-lg cursor-pointer rounded-lg w-full"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Signing out..." : "Sign out"}
-                    </button>
-                </div>
-                                {/* Mobile sign out at bottom */}
-                                <div className="md:hidden w-full px-3 pb-4">
-                                    <button
-                                        onClick={signOutUser}
-                                        className="text-white font-semibold button-bg px-4 py-2 rounded-lg w-full text-sm"
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? 'Signing out...' : 'Sign out'}
-                                    </button>
-                                </div>
+
+            </div>
+            {/* Fixed Sign Out Button at absolute bottom */}
+            <div className="absolute bottom-5 left-0 w-full px-3 pb-4">
+                <button
+                    onClick={signOutUser}
+                    className="button-bg text-white font-semibold md:font-bold w-full rounded-lg py-2.5 md:py-3 text-sm md:text-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Signing out...' : 'Sign out'}
+                </button>
             </div>
             {/* Edit Modal (center of viewport) */}
             {showEditModal && (
@@ -278,16 +269,16 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                                 className="input-fields"
                                 value={editData.displayName}
                                 minLength={3}
-                                onChange={e=> setEditData({...editData, displayName: e.target.value})}
+                                onChange={e => setEditData({ ...editData, displayName: e.target.value })}
                                 placeholder="Your username"
                                 required
                             />
                         </div>
                         {/* Photo upload removed */}
                         <div className="flex gap-3 justify-end">
-                            <button type="button" className="hover:cursor-pointer hover:scale-105 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded bg-gray-200 hover:bg-gray-300 w-28" onClick={()=> setShowEditModal(false)} disabled={updating}>Cancel</button>
+                            <button type="button" className="hover:cursor-pointer hover:scale-105 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded bg-gray-200 hover:bg-gray-300 w-28" onClick={() => setShowEditModal(false)} disabled={updating}>Cancel</button>
                             <button type="submit" className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded button-bg text-white disabled:opacity-70 w-28" disabled={updating}>
-                                {updating ? 'Saving...' : <><FaSave className="text-white" size={14}/> Save</>}
+                                {updating ? 'Saving...' : <><FaSave className="text-white" size={14} /> Save</>}
                             </button>
                         </div>
                     </form>
