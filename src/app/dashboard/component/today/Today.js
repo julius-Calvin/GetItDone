@@ -574,28 +574,28 @@ export const Today = () => {
 
     // Render all element
     return (
-        <div className="flex-1 bg-white relative">
+    <div className="flex-1 bg-white relative">
             {/* Header Section */}
-            <div className="w-full p-7 bg-white">
+        <div className="w-full p-5 md:p-7 bg-white">
                 <div className="flex flex-col gap-2">
-                    <span className="text-4xl font-bold flex flex-row gap-2">
+            <span className="text-3xl md:text-4xl font-bold flex flex-row gap-2">
                         <h1>Hello,</h1>
                         <h1 className="text-[#A23E48]">
                             {userInfo.displayName ? userInfo.displayName.split(' ')[0] : ''}
                         </h1>
                     </span>
-                    <h2 className="text-xl font-bold text-black/30">
+            <h2 className="text-lg md:text-xl font-bold text-black/30">
                         Let&apos;s finish some things today!
                     </h2>
                 </div>
             </div>
 
             {/* Main Content Section */}
-            <div className="p-5">
+        <div className="p-4 md:p-5">
                 <div className="flex-1">
-                    <div className="p-5 flex flex-col bg-[#F3F1F1] card-shadow rounded-lg">
+            <div className="p-4 md:p-5 flex flex-col bg-[#F3F1F1] card-shadow rounded-lg">
                         <div className="mb-2">
-                            <h1 className="font-bold text-xl ">Finish your task!</h1>
+                <h1 className="font-bold text-lg md:text-xl ">Finish your task!</h1>
                         </div>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
@@ -688,7 +688,7 @@ export const Today = () => {
             {/* Floating Eye Button */}
             <button
                 onClick={navigateToPomodoro}
-                className="hover:cursor-pointer fixed bottom-6 right-6 bg-[#A23E48] text-white p-4 rounded-full shadow-lg hover:bg-[#8e3640] transition-all duration-300 hover:scale-110 z-30"
+                className="hover:cursor-pointer fixed bottom-5 right-5 md:bottom-6 md:right-6 bg-[#A23E48] text-white p-4 rounded-full shadow-lg hover:bg-[#8e3640] transition-all duration-300 hover:scale-110 z-30"
                 aria-label="Focus Mode"
                 title="Pomodoro Mode"
             >

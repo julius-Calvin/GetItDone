@@ -440,9 +440,9 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
   // No full-page loading here; parent page handles initial loading
   
   return (
-  <div className="grid md:grid-cols-2 gap-8 relative">
+  <div className="grid md:grid-cols-2 gap-6 md:gap-8 relative w-full">
       {/* Timer Section */}
-      <div className="bg-white rounded-xl p-8 shadow-lg">
+  <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg order-2 md:order-1">
         {showSettings ? (
           <SettingsPanel
             settings={settings}
@@ -473,7 +473,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
             </div>
 
             <div className="flex flex-col items-center">
-              <div className="text-8xl font-bold text-[#A23E48] mb-8 font-mono">
+              <div className="text-6xl md:text-8xl font-bold text-[#A23E48] mb-6 md:mb-8 font-mono">
                 {formatTime(timeLeft)}
               </div>
               
@@ -532,9 +532,9 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
       </div>
       
       {/* Tasks Section */}
-      <div className="bg-white rounded-xl p-8 shadow-lg relative">
+  <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg relative order-1 md:order-2">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-[#A23E48]">Select a Task to Focus On</h2>
+          <h2 className="text-lg md:text-xl font-bold text-[#A23E48]">Select a Task to Focus On</h2>
           <button
             type="button"
             onClick={handleOpenAdd}
@@ -559,7 +559,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
             </button>
           </div>
         ) : (
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+          <div className="space-y-3 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-1">
             {availableTasks
               .slice()
               .sort((a, b) =>

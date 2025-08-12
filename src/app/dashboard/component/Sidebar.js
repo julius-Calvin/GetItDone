@@ -7,8 +7,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { FaSave, FaEdit } from 'react-icons/fa';
+import { RxCross2 } from 'react-icons/rx';
 
-export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoading }) {
+export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoading, mobile = false }) {
     const [error, setError] = useState(null);
     const [isSigningOut, setIsSigningOut] = useState(false);
     const router = useRouter();
@@ -108,9 +109,21 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
         }
     };
 
-    return (
-    <div className="flex flex-col min-h-screen items-center bg-[#F3F1F1] relative w-60 md:w-64 flex-shrink-0">
+        return (
+        <div className="flex flex-col min-h-screen items-center bg-[#F3F1F1] relative w-60 md:w-64 flex-shrink-0 shadow md:shadow-none">
             <div className="p-2 min-w-7 flex flex-col h-full w-full">
+                                {/* Mobile close */}
+                                                                {mobile && (
+                                                                    <div className="md:hidden flex justify-end mb-2">
+                                                                        <button 
+                                                                            onClick={() => setActiveView(activeView)} 
+                                                                            aria-label="Close navigation menu" 
+                                                                            className="p-2 rounded-md bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 shadow"
+                                                                        >
+                                                                            <RxCross2 className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                )}
                 {/* Profile Section*/}
                 <div className="flex flex-row p-3 items-center mb-6 relative w-full gap-3">
                     <div className="relative w-6 h-6 shrink-0">
@@ -231,7 +244,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                 )}
                 
                 {/* Sign Out Button - fallback if dropdown hidden */}
-                <div className="mt-auto mb-6 w-full px-3 hidden md:block">
+                                <div className="mt-auto mb-6 w-full px-3 hidden md:block">
                     <button
                         onClick={signOutUser}
                         className="text-[#F3F1F1] font-bold button-bg p-3 text-lg cursor-pointer rounded-lg w-full"
@@ -240,6 +253,16 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                         {isLoading ? "Signing out..." : "Sign out"}
                     </button>
                 </div>
+                                {/* Mobile sign out at bottom */}
+                                <div className="md:hidden w-full px-3 pb-4">
+                                    <button
+                                        onClick={signOutUser}
+                                        className="text-white font-semibold button-bg px-4 py-2 rounded-lg w-full text-sm"
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? 'Signing out...' : 'Sign out'}
+                                    </button>
+                                </div>
             </div>
             {/* Edit Modal (center of viewport) */}
             {showEditModal && (

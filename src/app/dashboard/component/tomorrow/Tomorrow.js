@@ -830,28 +830,28 @@ export const Tomorrow = () => {
     };
 
     return (
-        <div className="flex-1 bg-white">
+    <div className="flex-1 bg-white">
             {/* Header Section */}
-            <div className="w-full p-7 bg-white">
+        <div className="w-full p-5 md:p-7 bg-white">
                 <div className="flex flex-col gap-2">
-                    <span className="text-4xl font-bold flex flex-row gap-2">
+            <span className="text-3xl md:text-4xl font-bold flex flex-row gap-2">
                         <h1>Hello,</h1>
                         <h1 className="text-[#A23E48]">
                             {userInfo.displayName ? userInfo.displayName.split(' ')[0] : ''}
                         </h1>
                     </span>
-                    <h2 className="text-xl font-bold text-black/30">
+            <h2 className="text-lg md:text-xl font-bold text-black/30">
                         Let&apos;s plan your tomorrow!
                     </h2>
                 </div>
             </div>
 
             {/* Main Content Section */}
-            <div className="p-5">
-                <div className="flex gap-6">
+            <div className="p-4 md:p-5">
+                <div className="flex flex-col lg:flex-row gap-6">
                     {/* Today Card */}
-                    <div className="flex-1 bg-white rounded-lg shadow-lg p-6">
-                        <h3 className="text-xl font-bold mb-4">Today, {getCurrentDay()}</h3>
+                    <div className="flex-1 bg-white rounded-lg shadow-lg p-5">
+                        <h3 className="text-lg md:text-xl font-bold mb-4">Today, {getCurrentDay()}</h3>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
                         ) : todayTasks.length > 0 ? (
@@ -895,8 +895,8 @@ export const Tomorrow = () => {
                     </div>
 
                     {/* Tomorrow Card */}
-                    <div className="flex-1 bg-white rounded-lg shadow-lg p-6">
-                        <h3 className="text-xl font-bold mb-4">Tomorrow, {getTomorrowDay()}</h3>
+                    <div className="flex-1 bg-white rounded-lg shadow-lg p-5">
+                        <h3 className="text-lg md:text-xl font-bold mb-4">Tomorrow, {getTomorrowDay()}</h3>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
                         ) : tomorrowTasks.length > 0 ? (
