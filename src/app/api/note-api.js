@@ -134,3 +134,39 @@ export const deleteTask = async (taskId) => {
     throw error;
   }
 };
+
+// Rollover: Move all 'tomorrow' tasks into 'today' with appended ranks
+export const rolloverTomorrowTasksToToday = async (userId) => {
+  try {
+    if (!userId) return { moved: 0 };
+
+    // Fetch latest lists
+    const [todayTasks, tomorrowTasks] = await Promise.all([
+      getTodayTasks(userId),
+      getTomorrowTasks(userId)
+    ]);
+
+    if (!tomorrowTasks || tomorrowTasks.length === 0) {
+      return { moved: 0 };
+    }
+
+    // Determine starting rank (handle empty today list gracefully)
+    const maxRank = (todayTasks || []).reduce((max, t) => Math.max(max, t?.rank || 0), 0);
+    let nextRank = maxRank + 1;
+
+    // Preserve relative order of tomorrow tasks by their existing rank
+    const tomorrowSorted = [...tomorrowTasks].sort((a, b) => (a.rank || 0) - (b.rank || 0));
+
+    await Promise.all(
+      tomorrowSorted.map(task => {
+        const updates = { date: 'today', rank: nextRank++ };
+        return updateTask(task.id, updates);
+      })
+    );
+
+    return { moved: tomorrowSorted.length };
+  } catch (error) {
+    console.error('Error during rollover:', error);
+    return { moved: 0, error: true };
+  }
+};
