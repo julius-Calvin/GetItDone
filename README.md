@@ -24,7 +24,7 @@ A minimalist, responsive to‑do list application built with Next.js (App Router
 - Next.js 15 ([package.json](package.json))
 - React 19
 - Firebase Web SDK 12
-- Firestore & Storage
+- Firestore 
 - React Icons
 - DnD Kit
 - Tailwind/PostCSS pipeline
@@ -149,28 +149,5 @@ useEffect(() => {
 - Dark mode
 - Offline persistence
 - Notifications (Web Push)
-- User avatars (upload to Storage)
 
 ---
-
-## Contributing
-
-1. Fork
-2. Create feature branch
-3. Commit with clear messages
-4. Open PR
-
----
-
-## License
-
-Add a LICENSE file (MIT recommended) if you plan public contributions.
-
----
-
-## Acknowledgments
-
-- Next.js team
-- Firebase
-- DnD Kit
-- Geist font (via `next/font`)
