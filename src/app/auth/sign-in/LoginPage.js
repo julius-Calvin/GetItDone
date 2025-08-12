@@ -1,6 +1,7 @@
 'use client'
 
 import Link from "next/link"
+import Image from "next/image";
 import { useState } from 'react';
 import { loginUser } from "@/app/api/auth";
 import LoadingPage from "@/app/loading-comp/LoadingPage";
@@ -91,7 +92,7 @@ export default function LoginPage () {
             <form onSubmit={formSubmit}>
                 <div className="flex flex-col bg-white p-10 rounded-lg card-shadow min-w-sm gap-5">
                     <div className="flex flex-row">
-                        <button type="button" onClick={goToHome} className="hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out"><img src="/back-button.svg" className="w-5"/></button>
+                        <button type="button" onClick={goToHome} className="hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out"><Image src="/back-button.svg" alt="Back" width={20} height={20} className="w-5" /></button>
                         <span className="flex text-center w-full"><h1 className="font-bold w-full">WELCOME BACK</h1></span>
                     </div>
                     
@@ -161,7 +162,7 @@ export default function LoginPage () {
                         <GoogleButton setIsLoading={setIsLoading} />
                        
                         <span className="gap-1 justify-center text-center text-sm flex flex-row ">
-                            <p>Don't have an account?</p>
+                            <p>Don&apos;t have an account?</p>
                             <Link
                                 className="text-sm hover:underline text-[#A23E48] cursor-pointer text-center"
                                 href="/auth/register"

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react';
+import Image from 'next/image';
 import LoadingPage from "@/app/loading-comp/LoadingPage";
 import { forgetPassword } from '@/app/api/auth';
 import { useRouter } from "next/navigation";
@@ -68,8 +69,11 @@ export default function ForgetPassword () {
                             onClick={backToLogin}
                             type="button"
                         >
-                            <img 
+                            <Image 
                                 src="/back-button.svg"
+                                alt="Back"
+                                width={20}
+                                height={20}
                                 className="max-w-[20px] hover:cursor-pointer hover:scale-110 transition all 300ms ease-in-out"
                             />
                         </button>
