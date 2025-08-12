@@ -208,6 +208,32 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     };
   }, []);
   
+  // Handle timer completion (placed before startTimer to avoid TDZ issues)
+  const handleTimerComplete = useCallback(() => {
+    try {
+      audioRef.current?.play();
+    } catch (error) {
+      console.error("Couldn't play notification sound:", error);
+    }
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(`${mode === 'pomodoro' ? 'Time to take a break!' : 'Break finished!'}`, {
+        body: `${mode === 'pomodoro' ? 'Good job focusing!' : 'Ready to focus again?'}`,
+        icon: '/favicon.ico'
+      });
+    }
+    if (mode === 'pomodoro') {
+      const newCycles = cycles + 1;
+      setCycles(newCycles);
+      if (newCycles % settings.longBreakInterval === 0) {
+        setMode('longBreak');
+      } else {
+        setMode('shortBreak');
+      }
+    } else {
+      setMode('pomodoro');
+    }
+  }, [mode, cycles, settings.longBreakInterval]);
+
   const startTimer = useCallback(() => {
     if (isRunning) return;
     setIsRunning(true);
@@ -246,35 +272,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     }
   }, [mode, settings.pomodoro, settings.shortBreak, settings.longBreak, settings.autoStartBreaks, settings.autoStartPomodoros, cycles, startTimer]);
   
-  // Handle timer completion
-  const handleTimerComplete = useCallback(() => {
-    try {
-      audioRef.current?.play();
-    } catch (error) {
-      console.error("Couldn't play notification sound:", error);
-    }
-    
-    // Show notification if browser allows
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(`${mode === 'pomodoro' ? 'Time to take a break!' : 'Break finished!'}`, {
-        body: `${mode === 'pomodoro' ? 'Good job focusing!' : 'Ready to focus again?'}`,
-        icon: '/favicon.ico'
-      });
-    }
-    
-    if (mode === 'pomodoro') {
-      const newCycles = cycles + 1;
-      setCycles(newCycles);
-      
-      if (newCycles % settings.longBreakInterval === 0) {
-        setMode('longBreak');
-      } else {
-        setMode('shortBreak');
-      }
-    } else {
-      setMode('pomodoro');
-    }
-  }, [mode, cycles, settings.longBreakInterval]);
+  // (handleTimerComplete moved above startTimer)
   
   // Timer control helpers
   
