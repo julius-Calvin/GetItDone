@@ -110,7 +110,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#F3F1F1] relative w-60 md:w-64 flex-shrink-0 shadow md:shadow-none">
+        <div className="flex flex-col min-h-screen bg-surface-alt transition-theme relative w-60 md:w-64 flex-shrink-0 shadow md:shadow-none">
             {/* Scrollable content area with bottom padding to avoid overlap with fixed sign-out */}
             <div className="p-2 min-w-7 flex flex-col h-full w-full pb-24 overflow-y-auto">
                 {/* Mobile close */}
@@ -139,12 +139,12 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                     <span className="font-bold select-none text-sm md:text-base truncate" title={userInfo.displayName || 'No Username'}>
                         {isLoading ? 'Fetching username.....' : (userInfo.displayName || 'No Username')}
                     </span>
-                    <button
-                        type="button"
-                        aria-label="Edit username"
-                        onClick={openEdit}
-                        className="ml-auto p-1.5 rounded hover:bg-gray-200 transition-colors text-gray-600 hover:text-gray-800"
-                    >
+                        <button
+                            type="button"
+                            aria-label="Edit username"
+                            onClick={openEdit}
+                            className="ml-auto p-1.5 rounded hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors text-gray-600 dark:text-neutral-300 hover:text-gray-800 dark:hover:text-white"
+                        >
                         <FaEdit size={14} />
                     </button>
                 </div>
@@ -153,8 +153,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                 <div className="flex flex-col gap-1 flex-grow">
                     {/* Today task - Target icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-gray-100'
-                            }`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-gray-100 dark:hover:bg-neutral-700'} text-sm md:text-base`}
                         onClick={() => {
                             setActiveView('today')
                         }}
@@ -175,8 +174,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
 
                     {/* Tomorrow - Calendar icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-gray-100'
-                            }`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-gray-100 dark:hover:bg-neutral-700'} text-sm md:text-base`}
                         onClick={() => setActiveView('tomorrow')}
                     >
                         <svg
@@ -258,7 +256,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
             {/* Edit Modal (center of viewport) */}
             {showEditModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                    <form onSubmit={handleProfileUpdate} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm flex flex-col gap-4">
+                    <form onSubmit={handleProfileUpdate} className="bg-surface p-6 rounded-lg shadow-lg w-full max-w-sm flex flex-col gap-4 transition-theme">
                         <h2 className="font-bold text-lg">Edit Profile</h2>
                         {updateError && <div className="text-sm text-red-600 bg-red-100 p-2 rounded">{updateError}</div>}
                         {updateSuccess && <div className="text-sm text-green-600 bg-green-100 p-2 rounded">{updateSuccess}</div>}

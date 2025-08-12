@@ -322,7 +322,7 @@ export const Today = () => {
                 rolloverTomorrowTasksToToday(user.uid).then(() => {
                     if (typeof window !== 'undefined') localStorage.setItem(lastKey, todayStr);
                     getTodayTasks(user.uid).then(data => setTasks(data || []));
-                }).catch(() => {});
+                }).catch(() => { });
             }
         } catch { /* ignore */ }
         const id = scheduleNextMidnight();
@@ -552,13 +552,13 @@ export const Today = () => {
         };
 
         return (
-            <div className="flex flex-col card-shadow p-5 rounded-lg bg-[#F3F1F1] mt-5">
+            <div className="flex flex-col card-shadow p-5 rounded-lg bg-surface-alt dark:bg-[#1f1f1f] mt-5 transition-theme">
                 <div className="flex justify-between items-center mb-3">
                     <h1 className="font-bold text-xl">Finished</h1>
                     {finishedTasks.length > 0 && (
                         <button
                             onClick={confirmDeleteAllTasks}
-                            className="bg-[#A23E48] text-white px-3 py-1 rounded-md text-sm hover:scale-105 transition-all duration-300 ease-in-out hover:cursor-pointer flex items-center gap-1"
+                            className="brand-btn px-3 py-1 !rounded-md text-sm hover:scale-105 transition-all duration-300 ease-in-out hover:cursor-pointer flex items-center gap-1"
                         >
                             <FaTrashCan className="w-4 h-4 bg-[#A23E48]" />
                         </button>
@@ -570,7 +570,7 @@ export const Today = () => {
                         {finishedTasks.map((task) => (
                             <div
                                 key={task.id}
-                                className="bg-[#A23E48] bg-opacity-80 rounded-lg p-3 text-white flex items-center gap-3"
+                                className="rounded-lg p-3 flex items-center gap-3 bg-[#A23E48] text-white dark:shadow-inner"
                             >
                                 <div className="w-5 h-5 flex items-center justify-center">
                                     <button
@@ -620,28 +620,28 @@ export const Today = () => {
 
     // Render all element
     return (
-    <div className="flex-1 bg-white relative">
+        <div className="flex-1 bg-surface transition-theme relative dark:bg-[#1f1f1f]">
             {/* Header Section */}
-        <div className="w-full p-5 md:p-7 bg-white">
+            <div className="w-full p-5 md:p-7 dark:bg-[#161616] transition-theme border-b border-transparent dark:border-neutral-800/80">
                 <div className="flex flex-col gap-2">
-            <span className="text-3xl md:text-4xl font-bold flex flex-row gap-2">
-                        <h1>Hello,</h1>
+                    <span className="text-3xl md:text-4xl font-bold flex flex-row gap-2">
+                        <h1> Hello,</h1>
                         <h1 className="text-[#A23E48]">
                             {userInfo.displayName ? userInfo.displayName.split(' ')[0] : ''}
                         </h1>
                     </span>
-            <h2 className="text-lg md:text-xl font-bold text-black/30">
+                    <h2 className="text-lg md:text-xl font-bold text-neutral-600 dark:text-neutral-400">
                         Let&apos;s finish some things today!
                     </h2>
                 </div>
             </div>
 
             {/* Main Content Section */}
-        <div className="p-4 md:p-5">
+            <div className="p-4 md:p-5">
                 <div className="flex-1">
-            <div className="p-4 md:p-5 flex flex-col bg-[#F3F1F1] card-shadow rounded-lg">
+                    <div className="p-4 md:p-5 flex flex-col bg-surface-alt dark:bg-[#1f1f1f] card-shadow rounded-lg transition-theme">
                         <div className="mb-2">
-                <h1 className="font-bold text-lg md:text-xl ">Finish your task!</h1>
+                            <h1 className="font-bold text-lg md:text-xl ">Finish your task!</h1>
                         </div>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
@@ -676,12 +676,12 @@ export const Today = () => {
                         {showModal && (
                             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                                 <form
-                                    className="bg-[#F3F1F1] rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4"
+                                    className="bg-surface-alt dark:bg-[#1e1e1e] rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4 transition-theme"
                                     onSubmit={handleAddTask}
                                 >
                                     <h2 className="text-lg font-bold mb-2">Add Task</h2>
                                     <input
-                                        className="border rounded p-2 mb-2 w-full outline-none"
+                                        className="input-fields mb-2 w-full"
                                         placeholder="Title"
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
@@ -689,7 +689,7 @@ export const Today = () => {
                                         disabled={isSaving}
                                     />
                                     <textarea
-                                        className="border rounded p-2 mb-2 w-full outline-none"
+                                        className="input-fields mb-2 w-full"
                                         placeholder="Description (optional)"
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
@@ -698,7 +698,7 @@ export const Today = () => {
                                     {error && <p className="text-red-500 text-sm">{error}</p>}
                                     <div className="flex justify-end gap-2">
                                         <button
-                                            className="px-4 rounded-lg py-2 bg-gray-300 hover:scale-105 hover:bg-gray-400/70 hover:cursor-pointer transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+                                            className="px-4 rounded-lg py-2 bg-gray-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 hover:scale-105 hover:bg-gray-400/70 hover:cursor-pointer transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
                                             onClick={() => setShowModal(false)}
                                             type="button"
                                             disabled={isSaving}
@@ -706,7 +706,7 @@ export const Today = () => {
                                             Cancel
                                         </button>
                                         <button
-                                            className="px-4 py-2 rounded-lg bg-[#A23E48] text-white flex items-center gap-2 justify-center hover:cursor-pointer hover:scale-105 hover:bg-[#8e3640] transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+                                            className="px-4 py-2 rounded-lg brand-btn flex items-center gap-2 justify-center hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                                             type="submit"
                                             disabled={isLoading || isSaving}
                                         >

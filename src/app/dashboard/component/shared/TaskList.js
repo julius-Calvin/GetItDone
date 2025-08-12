@@ -43,7 +43,7 @@ const SortableTaskItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`${task?.isFinished ? 'opacity-50 ' : ''} bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02]'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
+      className={`${task?.isFinished ? 'opacity-50 ' : ''} rounded-lg p-4 text-white transition-all duration-300 ease-out bg-[#A23E48] dark:bg-gradient-to-br dark:from-[#A23E48] dark:to-[#7d2d35] ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02]'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
     >
       {editIdx === index ? (
         <form onSubmit={onSave} className="w-full">

@@ -56,11 +56,11 @@ function SettingsPanel({ settings, onSave, isLoading }) {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="bg-surface-alt dark:bg-[#1f1f1f] rounded-lg p-6 w-full max-w-md transition-theme">
       <h2 className="text-xl font-bold text-[#A23E48] mb-4">Timer Settings</h2>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Pomodoro (minutes)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pomodoro (minutes)</label>
           <input
             type="text"
             inputMode="numeric"
@@ -71,7 +71,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Short Break (minutes)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Short Break (minutes)</label>
           <input
             type="text"
             inputMode="numeric"
@@ -82,7 +82,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Long Break (minutes)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Long Break (minutes)</label>
           <input
             type="text"
             inputMode="numeric"
@@ -93,7 +93,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Long Break Interval</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Long Break Interval</label>
           <input
             type="text"
             inputMode="numeric"
@@ -111,7 +111,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
             onChange={e => setLocal(prev => ({ ...prev, autoStartBreaks: e.target.checked }))}
             className="hover:cursor-pointer h-4 w-4 text-[#A23E48] focus:ring-[#A23E48]"
           />
-          <label htmlFor="autoStartBreaks" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor="autoStartBreaks" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
             Auto-start Breaks
           </label>
         </div>
@@ -123,14 +123,14 @@ function SettingsPanel({ settings, onSave, isLoading }) {
             onChange={e => setLocal(prev => ({ ...prev, autoStartPomodoros: e.target.checked }))}
             className="hover:cursor-pointer h-4 w-4 text-[#A23E48] focus:ring-[#A23E48]"
           />
-          <label htmlFor="autoStartPomodoros" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor="autoStartPomodoros" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
             Auto-start Pomodoros
           </label>
         </div>
       </div>
       <div className="mt-6 flex justify-end">
         <button
-          className="hover:cursor-pointer px-4 py-2 bg-[#A23E48] text-white rounded-md hover:bg-[#8e3640] transition-colors"
+          className="hover:cursor-pointer brand-btn px-4 py-2 !rounded-md"
           onClick={handleSave}
           disabled={isLoading}
         >
@@ -495,9 +495,9 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
   // No full-page loading here; parent page handles initial loading
   
   return (
-  <div className="grid md:grid-cols-2 gap-6 md:gap-8 relative w-full">
+  <div className="grid md:grid-cols-2 gap-6 md:gap-8 relative w-full transition-theme">
       {/* Timer Section */}
-  <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg order-2 md:order-1">
+  <div className="bg-surface-alt dark:bg-[#1f1f1f] rounded-xl p-6 md:p-8 shadow-lg order-2 md:order-1 transition-theme">
         {showSettings ? (
           <SettingsPanel
             settings={settings}
@@ -509,19 +509,19 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
             <div className="flex justify-center space-x-4 mb-8">
               <button 
                 onClick={() => setMode('pomodoro')} 
-                className={`px-4 py-2 rounded-full ${mode === 'pomodoro' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 text-gray-700'}`}
+                className={`px-4 py-2 rounded-full transition-colors ${mode === 'pomodoro' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200'}`}
               >
                 Pomodoro
               </button>
               <button 
                 onClick={() => setMode('shortBreak')} 
-                className={`px-4 py-2 rounded-full ${mode === 'shortBreak' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 text-gray-700'}`}
+                className={`px-4 py-2 rounded-full transition-colors ${mode === 'shortBreak' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200'}`}
               >
                 Short Break
               </button>
               <button 
                 onClick={() => setMode('longBreak')} 
-                className={`px-4 py-2 rounded-full ${mode === 'longBreak' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 text-gray-700'}`}
+                className={`px-4 py-2 rounded-full transition-colors ${mode === 'longBreak' ? 'bg-[#A23E48] text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-200'}`}
               >
                 Long Break
               </button>
@@ -541,13 +541,13 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                 </button>
                 <button 
                   onClick={resetTimer}
-                  className="bg-gray-200 p-4 rounded-full hover:bg-gray-300 transition-colors"
+                  className="bg-gray-200 dark:bg-neutral-700 p-4 rounded-full hover:bg-gray-300 dark:hover:bg-neutral-600 transition-colors"
                 >
                   <FaRedo className="w-6 h-6 text-gray-700" />
                 </button>
               </div>
               
-              <div className="text-center text-gray-600 mb-6">
+              <div className="text-center text-gray-600 dark:text-gray-300 mb-6">
                 <p>Completed: {cycles} {cycles === 1 ? 'session' : 'sessions'}</p>
                 {selectedTaskId && !availableTasks.find(t => t.id === selectedTaskId)?.isFinished && (
                   <div className="mt-4 text-center">
@@ -576,7 +576,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
               
               <button 
                 onClick={() => {setShowSettings(true)}}
-                className="hover:cursor-pointer flex items-center gap-2 text-gray-600 hover:text-[#A23E48] transition-colors"
+                    className="hover:cursor-pointer flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-[#A23E48] transition-colors"
               >
                 <IoMdSettings className="w-5 h-5" />
                 Settings
@@ -587,13 +587,13 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
       </div>
       
       {/* Tasks Section */}
-  <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg relative order-1 md:order-2">
+  <div className="bg-surface-alt dark:bg-[#1f1f1f] rounded-xl p-6 md:p-8 shadow-lg relative order-1 md:order-2 transition-theme">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg md:text-xl font-bold text-[#A23E48]">Select a Task to Focus On</h2>
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="hover:cursor-pointer px-4 py-2 rounded-md bg-[#A23E48] text-white text-sm font-semibold hover:bg-[#8e3640] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="hover:cursor-pointer brand-btn px-4 py-2 !rounded-md text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={adding}
           >
             + Add Task
@@ -601,13 +601,13 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
         </div>
         
   {availableTasks.length === 0 ? (
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-10 text-gray-500 dark:text-gray-400">
             <p>No tasks available</p>
             <p className="mt-2 text-sm">Add one now to start focusing</p>
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="hover:scale-105 transition-all duration-300 ease-in-out mt-4 hover:cursor-pointer px-4 py-2 rounded-md bg-[#A23E48] text-white text-sm font-semibold hover:bg-[#8e3640] "
+              className="hover:scale-105 transition-all duration-300 ease-in-out mt-4 hover:cursor-pointer brand-btn px-4 py-2 !rounded-md text-sm font-semibold "
               disabled={adding}
             >
               + Add Task
@@ -631,7 +631,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                     ? 'bg-[#A23E48] text-white cursor-pointer'
                     : 'bg-gray-100 hover:bg-gray-200 cursor-pointer';
                 return (
-                  <div 
+                    <div 
                     key={task.id}
                     onClick={() => {
                       if (task.isFinished) return;
@@ -656,7 +656,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                       <div>
                         <h3 className="font-medium">{task.title}</h3>
                         {task.description && (
-                          <p className={`text-sm ${isSelected ? 'text-white/80' : 'text-gray-600'}`}>
+                          <p className={`text-sm ${isSelected ? 'text-white/80' : 'text-gray-600 dark:text-gray-300'}`}>
                             {task.description}
                           </p>
                         )}
@@ -670,13 +670,13 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
       </div>
       {showAddModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <form onSubmit={handleAddTask} className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm flex flex-col gap-4">
+          <form onSubmit={handleAddTask} className="bg-surface-alt dark:bg-[#1f1f1f] rounded-lg p-6 shadow-lg w-full max-w-sm flex flex-col gap-4 transition-theme">
             <h2 className="font-bold text-lg text-[#A23E48]">Add Focus Task</h2>
             {addError && <div className="text-sm text-red-600 bg-red-100 p-2 rounded">{addError}</div>}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold">Title</label>
               <input
-                className="border rounded px-3 py-2 outline-none focus:ring-2 focus:ring-[#A23E48]/40"
+                className="input-fields focus:ring-2 focus:ring-[#A23E48]/40"
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
                 placeholder="Task title"
@@ -688,7 +688,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold">Description</label>
               <textarea
-                className="border rounded px-3 py-2 outline-none resize-none focus:ring-2 focus:ring-[#A23E48]/40"
+                className="input-fields resize-none focus:ring-2 focus:ring-[#A23E48]/40"
                 value={newDescription}
                 onChange={e => setNewDescription(e.target.value)}
                 placeholder="Optional description"
@@ -701,14 +701,14 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-sm font-medium hover:cursor-pointer disabled:opacity-60"
+                className="px-4 py-2 rounded bg-gray-200 dark:bg-neutral-700 hover:bg-gray-300 dark:hover:bg-neutral-600 text-sm font-medium hover:cursor-pointer disabled:opacity-60"
                 disabled={adding}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded bg-[#A23E48] text-white text-sm font-semibold hover:bg-[#8e3640] hover:cursor-pointer disabled:opacity-60 flex items-center gap-2"
+                className="brand-btn px-4 py-2 !rounded text-sm font-semibold hover:cursor-pointer disabled:opacity-60 flex items-center gap-2"
                 disabled={adding}
               >
                 {adding && <span className="inline-block h-4 w-4 rounded-full border-2 border-white/60 border-t-white animate-spin" />}

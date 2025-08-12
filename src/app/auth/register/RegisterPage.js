@@ -112,18 +112,18 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen ">
-            <form onSubmit={formSubmit}>
-                <div className="flex flex-col bg-white p-10 rounded-lg card-shadow min-w-sm max-w-lg gap-5">
+        <div className="flex items-center justify-center min-h-screen bg-surface-alt dark:bg-[#121212] transition-theme px-4 py-8">
+            <form onSubmit={formSubmit} className="w-full max-w-sm mx-auto">
+                <div className="flex flex-col bg-surface dark:bg-[#1b1b1b] p-8 rounded-lg card-shadow gap-5 border border-base transition-theme">
                     <h1 className="text-center font-bold">WELCOME</h1>
                     {/* Alert to show message and error */}
                     {message && (
-                        <div className="p-2 text-center rounded-lg text-[white] bg-green-700/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80">
                             {message}
                         </div>
                     )}
                     {error && (
-                        <div className="p-2 text-center rounded-lg text-[white] bg-red-700/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80">
                             {error}
                         </div>
                     )}
@@ -199,21 +199,19 @@ export default function RegisterPage() {
 
                     {/*Button Sign in and Google Sign in*/}
                     <div className="flex flex-col gap-2">
-                        <button type="submit" className="button-bg">
-                            Register
-                        </button>
+                        <button type="submit" className="button-bg">Register</button>
                         <p className="text-center">or</p>
 
                        {/* Google */}
                        <GoogleButton />
 
-                        <span className="gap-1 justify-center text-center text-sm flex flex-row ">
+            <span className="gap-1 justify-center text-center text-sm flex flex-row ">
                             <p>Already have an account?</p>
                             <Link
                                 className="text-sm hover:underline text-[#A23E48] cursor-pointer text-center"
                                 href='/auth/sign-in'
                             >
-                                Sign in here
+                Sign in here
                             </Link>
                         </span>
                     </div>

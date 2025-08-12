@@ -61,9 +61,9 @@ export default function ForgetPassword () {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen ">
-            <form onSubmit={formSubmit}>
-                <div className="flex flex-col bg-white p-10 rounded-lg card-shadow min-w-sm gap-5">
+        <div className="flex items-center justify-center min-h-screen bg-surface-alt dark:bg-[#121212] transition-theme px-4 py-8">
+            <form onSubmit={formSubmit} className="w-full max-w-sm mx-auto">
+                <div className="flex flex-col bg-surface dark:bg-[#1b1b1b] p-8 rounded-lg card-shadow min-w-sm gap-5 border border-base transition-theme">
                     <div className="flex flex-row">
                         <button 
                             onClick={backToLogin}
@@ -84,12 +84,12 @@ export default function ForgetPassword () {
                     
                     {/* Alert to show message and error */}
                     {message && (
-                        <div className="p-2 text-center rounded-lg text-[white] bg-green-700/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80">
                             {message}
                         </div>
                     )}
                     {error && (
-                        <div className="p-2 text-center rounded-lg text-[white] bg-red-700/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80">
                             {error}
                         </div>
                     )}

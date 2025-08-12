@@ -16,6 +16,7 @@ A minimalist, responsive to‑do list application built with Next.js (App Router
 - Responsive sidebar with mobile close interaction
 - Tailwind CSS (via PostCSS config)
 - Ready for Vercel deployment
+ - Dark mode (automatic + manual toggle, cycles Light / Dark / System)
 
 ---
 
@@ -143,10 +144,15 @@ useEffect(() => {
 
 ---
 
+## Dark Mode Implementation
+
+The app uses CSS variables + Tailwind `dark:` utilities. A `ThemeProvider` syncs a user preference (light / dark / system) to `localStorage` (key: `theme-pref`). On first paint, an inline script sets `data-theme` and toggles the `dark` class to avoid a flash of incorrect theme.
+
+Toggle (top-right) cycles: Light → Dark → System. Selecting System follows the OS preference dynamically.
+
 ## Roadmap Ideas
 
 - Task filters & search
-- Dark mode
 - Offline persistence
 - Notifications (Web Push)
 

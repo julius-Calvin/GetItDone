@@ -70,7 +70,7 @@ export default function Home() {
           </div>
         )}
 
-        <section className="card-shadow relative w-full rounded-2xl b dark:bg-neutral-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.05)] p-8 sm:p-10 flex flex-col items-center gap-8 text-center ">
+  <section className="card-shadow relative w-full rounded-2xl dark:bg-black shadow-[0_8px_30px_rgba(162,62,72,0.35),0_0_0_1px_rgba(162,62,72,0.25)] dark:shadow-[0_8px_40px_rgba(162,62,72,0.55),0_0_0_1px_rgba(162,62,72,0.4)] p-8 sm:p-10 flex flex-col items-center gap-8 text-center transition-shadow">
           <div>
             <Image
               src="/logo.png"

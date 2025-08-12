@@ -45,8 +45,8 @@ export default function Page() {
   const showLoading = authLoading || dataLoading
   return (
     showLoading ? <LoadingPage /> : (
-      <div className="p-5 md:p-10">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[#A23E48]">Focus Time</h1>
+      <div className="p-5 md:p-10 bg-surface transition-theme min-h-screen">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-[#A23E48] dark:text-[#A23E48]">Focus Time</h1>
         <PomodoroTimer tasks={tasks} isLoading={showLoading} userId={user?.uid} />
       </div>
     )
