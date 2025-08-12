@@ -163,6 +163,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     return 25 * 60;
   }); // in seconds
   const [isRunning, setIsRunning] = useState(false);
+  const runningRef = useRef(false); // decouple running guard from re-render
   const [cycles, setCycles] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   
@@ -191,29 +192,79 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
   const timerRef = useRef(null);
   const audioRef = useRef(null);
   
-  // Initialize audio
+  // Initialize audio with diagnostics + fallback beep
   useEffect(() => {
+    const AUDIO_PATH = '/sounds/notification.mp3';
     try {
-      audioRef.current = new Audio('/sounds/notification.mp3');
-      // Optional: Test loading the audio
-      audioRef.current.addEventListener('error', (e) => {
-        console.error("Error loading audio file:", e);
-      });
+      const el = new Audio();
+      el.src = AUDIO_PATH;
+      el.preload = 'auto';
+      // Better diagnostics
+      const logMediaError = () => {
+        const mediaErr = el.error;
+        if (mediaErr) {
+          const codes = ['MEDIA_ERR_CUSTOM','MEDIA_ERR_ABORTED','MEDIA_ERR_NETWORK','MEDIA_ERR_DECODE','MEDIA_ERR_SRC_NOT_SUPPORTED','MEDIA_ERR_ENCRYPTED'];
+          console.error('[PomodoroAudio] Load error', {
+            code: mediaErr.code,
+            codeLabel: codes[mediaErr.code] || 'UNKNOWN',
+            message: mediaErr.message
+          });
+        } else {
+          console.error('[PomodoroAudio] Unknown audio load error (no mediaErr)');
+        }
+      };
+      el.addEventListener('error', logMediaError);
+      el.addEventListener('canplaythrough', () => {
+        // console.debug('[PomodoroAudio] Audio ready');
+      }, { once: true });
+      audioRef.current = el;
     } catch (error) {
-      console.warn("Audio not supported by browser:", error);
+      console.warn('[PomodoroAudio] Audio not supported by browser, will use Web Audio beep fallback:', error);
     }
-    
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  const playFallbackBeep = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880; // A5
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.7);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.72);
+    } catch (e) {
+      console.error('[PomodoroAudio] Fallback beep failed', e);
+    }
+  }, []);
   
   // Handle timer completion (placed before startTimer to avoid TDZ issues)
   const handleTimerComplete = useCallback(() => {
+    let attemptedPlay = false;
     try {
-      audioRef.current?.play();
+      if (audioRef.current) {
+        const p = audioRef.current.play();
+        attemptedPlay = true;
+        if (p && typeof p.then === 'function') {
+          p.catch(err => {
+            console.warn('[PomodoroAudio] Playback blocked, using fallback beep', err?.name || err);
+            playFallbackBeep();
+          });
+        }
+      }
     } catch (error) {
-      console.error("Couldn't play notification sound:", error);
+      console.error("Couldn't play notification sound, using fallback beep:", error);
+      playFallbackBeep();
+    }
+    if (!attemptedPlay) {
+      playFallbackBeep();
     }
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       new Notification(`${mode === 'pomodoro' ? 'Time to take a break!' : 'Break finished!'}`, {
@@ -232,22 +283,24 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     } else {
       setMode('pomodoro');
     }
-  }, [mode, cycles, settings.longBreakInterval]);
+  }, [mode, cycles, settings.longBreakInterval, playFallbackBeep]);
 
   const startTimer = useCallback(() => {
-    if (isRunning) return;
+    if (runningRef.current) return; // already running
+    runningRef.current = true;
     setIsRunning(true);
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
+          runningRef.current = false;
           handleTimerComplete();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-  }, [isRunning, handleTimerComplete]);
+  }, [handleTimerComplete]);
 
   // Update timer when mode/settings change
   useEffect(() => {
@@ -263,6 +316,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
         break;
     }
     setIsRunning(false);
+    runningRef.current = false;
     if (timerRef.current) clearInterval(timerRef.current);
 
     if ((mode === 'shortBreak' || mode === 'longBreak') && settings.autoStartBreaks) {
@@ -270,7 +324,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
     } else if (mode === 'pomodoro' && settings.autoStartPomodoros && cycles > 0) {
       startTimer();
     }
-  }, [mode, settings.pomodoro, settings.shortBreak, settings.longBreak, settings.autoStartBreaks, settings.autoStartPomodoros, cycles, startTimer]);
+  }, [mode, settings.pomodoro, settings.shortBreak, settings.longBreak, settings.autoStartBreaks, settings.autoStartPomodoros, cycles]);
   
   // (handleTimerComplete moved above startTimer)
   
@@ -278,6 +332,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
   
   const pauseTimer = () => {
     setIsRunning(false);
+  runningRef.current = false;
     clearInterval(timerRef.current);
   };
   
