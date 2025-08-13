@@ -106,7 +106,7 @@ export default function Home() {
             <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
               <button
                 onClick={signOutUser}
-                className="font-bold cursor-pointer hover:scale-105 px-6 py-3 rounded-xl border border-neutral-300/60 bg-white/60 hover:bg-white/90  text-neutral-700 shadow-sm hover:shadow disabled:opacity-60 transition-all duration-300 ease-in-out w-full sm:w-auto"
+                className="font-bold cursor-pointer px-[1rem] py-[.625rem] button-no-brand rounded-xl border border-neutral-300/60 bg-white/60 hover:bg-white/90  text-neutral-700 shadow-sm hover:shadow disabled:opacity-60 transition-all duration-300 ease-in-out w-full sm:w-auto"
                 disabled={isLoading}
               >
                 Sign out
@@ -116,7 +116,7 @@ export default function Home() {
                   router.push('/dashboard');
                   setIsLoading(true);
                 }}
-                className="button-bg text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg disabled:opacity-60 transition w-full sm:w-auto"
+                className="button-bg brand-btn text-white font-semibold rounded-xl shadow-md hover:shadow-lg disabled:opacity-60 transition w-full sm:w-auto"
                 disabled={isLoading}
               >
                 Dashboard
