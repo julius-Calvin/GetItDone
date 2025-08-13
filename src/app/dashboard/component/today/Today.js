@@ -698,7 +698,7 @@ export const Today = () => {
                                     {error && <p className="text-red-500 dark:text-red-400 text-sm">{error}</p>}
                                     <div className="flex justify-end gap-2">
                                         <button
-                                            className="px-4 rounded-lg py-2 bg-gray-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 hover:scale-105 hover:bg-gray-400/70 hover:cursor-pointer transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+                                            className="px-4 rounded-lg py-2 button-no-brand"
                                             onClick={() => setShowModal(false)}
                                             type="button"
                                             disabled={isSaving}

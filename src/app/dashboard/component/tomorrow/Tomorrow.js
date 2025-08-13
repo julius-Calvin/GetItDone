@@ -857,14 +857,14 @@ export const Tomorrow = () => {
                 {showModal && (
                     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                         <form
-                            className="bg-white dark:bg-[#1e1e1e] rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4 transition-theme"
+                            className="bg-surface rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4 transition-theme border border-neutral-200 dark:border-neutral-800"
                             onSubmit={handleAddTask}
                         >
                             <h2 className="text-lg font-bold mb-2">
                                 Add {modalType === 'today' ? "Today's" : "Tomorrow's"} Task
                             </h2>
                             <input
-                                className="border rounded p-2 mb-2 w-full outline-none"
+                                className="border bg-surface input-fields border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 rounded p-2 mb-2 w-full outline-none focus:ring-2 focus:ring-[#A23E48]/40 focus:border-[#A23E48]/50"
                                 placeholder="Title"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -872,41 +872,39 @@ export const Tomorrow = () => {
                                 disabled={isSaving}
                             />
                             <textarea
-                                className="border rounded p-2 mb-2 w-full outline-none"
+                                className="border bg-surface input-fields dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 rounded p-2 mb-2 w-full outline-none focus:ring-2 focus:ring-[#A23E48]/40 focus:border-[#A23E48]/50 resize-none"
                                 placeholder="Description (optional)"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 disabled={isSaving}
+                                rows={4}
                             />
-                            {error && <p className="text-red-500 text-sm">{error}</p>}
+                            {error && <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
                             <div className="flex justify-end gap-2">
                                 <button
-                                    className="px-4 rounded-lg py-2 bg-gray-300 dark:bg-neutral-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                                    onClick={() => {
-                                        setShowModal(false);
-                                        setModalType('');
-                                    }}
+                                    className="px-4 button-no-brand rounded-lg py-2"
+                                    onClick={() => { setShowModal(false); setModalType(''); }}
                                     type="button"
                                     disabled={isSaving}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className={`px-4 py-2 rounded-lg text-white flex items-center gap-2 justify-center hover:cursor-pointer bg-[#A23E48] disabled:opacity-60 disabled:cursor-not-allowed`}
-                                    type="submit"
-                                    disabled={isLoading || isSaving}
+                                  className="brand-btn px-4 py-2 rounded-lg text-white flex items-center gap-2 justify-center hover:cursor-pointer bg-[#A23E48] hover:bg-[#8e3640] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 ease-in-out"
+                                  type="submit"
+                                  disabled={isLoading || isSaving}
                                 >
-                                    {isSaving ? (
-                                        <>
-                                            <span className="inline-block h-4 w-4 rounded-full border-2 border-white/60 border-t-white animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <FaSave className="w-5 h-5" />
-                                            Save
-                                        </>
-                                    )}
+                                  {isSaving ? (
+                                    <>
+                                      <span className="inline-block h-4 w-4 rounded-full border-2 border-white/60 border-t-white animate-spin" />
+                                      Saving...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FaSave className="w-5 h-5" />
+                                      Save
+                                    </>
+                                  )}
                                 </button>
                             </div>
                         </form>
