@@ -4,6 +4,7 @@ import { auth } from "@/app/api/firebase-config"
 import { onAuthStateChanged } from "firebase/auth";
 import { logoutUser, updateUserProfile } from "@/app/api/auth";
 import { useState, useEffect } from "react";
+import { createPortal } from 'react-dom';
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { FaSave, FaEdit } from 'react-icons/fa';
@@ -20,6 +21,9 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
     const [updating, setUpdating] = useState(false);
     const [updateError, setUpdateError] = useState('');
     const [updateSuccess, setUpdateSuccess] = useState('');
+    const [mounted, setMounted] = useState(false); // for portal safety
+
+    useEffect(() => { setMounted(true); }, []);
 
     // Get current user
     useEffect(() => {
@@ -139,12 +143,12 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                     <span className="font-bold select-none text-sm md:text-base truncate text-foreground" title={userInfo.displayName || 'No Username'}>
                         {isLoading ? 'Fetching username.....' : (userInfo.displayName || 'No Username')}
                     </span>
-                        <button
-                            type="button"
-                            aria-label="Edit username"
-                            onClick={openEdit}
-                            className="ml-auto p-1.5 rounded hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors text-gray-600 dark:text-neutral-300 hover:text-gray-800 dark:hover:text-white"
-                        >
+                    <button
+                        type="button"
+                        aria-label="Edit username"
+                        onClick={openEdit}
+                        className="ml-auto p-1.5 rounded hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors text-gray-600 dark:text-neutral-300 hover:text-gray-800 dark:hover:text-white"
+                    >
                         <FaEdit size={14} />
                     </button>
                 </div>
@@ -153,7 +157,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                 <div className="flex flex-col gap-1 flex-grow">
                     {/* Today task - Target icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-900 text-foreground'} text-sm md:text-base`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 text-foreground hover:text-black'} text-sm md:text-base`}
                         onClick={() => {
                             setActiveView('today')
                         }}
@@ -174,7 +178,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
 
                     {/* Tomorrow - Calendar icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-800/70 dark:hover:text-white/90 text-foreground'} text-sm md:text-base`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-800/70 dark:hover:text-white/90 text-foreground hover:text-black'} text-sm md:text-base`}
                         onClick={() => setActiveView('tomorrow')}
                     >
                         <svg
@@ -253,16 +257,23 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                     {isLoading ? 'Signing out...' : 'Sign out'}
                 </button>
             </div>
-            {/* Edit Modal (center of viewport) */}
-            {showEditModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                    <form onSubmit={handleProfileUpdate} className="bg-surface dark:bg-[#1e1e1e] p-6 rounded-lg shadow-lg w-full max-w-sm flex flex-col gap-4 transition-theme">
+            {/* Edit Modal (center of full viewport via portal) */}
+            {mounted && showEditModal && createPortal(
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-0 bg-black/40">
+                    <form
+                        onSubmit={handleProfileUpdate}
+                        className="relative bg-surface dark:bg-[#1e1e1e] p-6 rounded-lg shadow-xl w-full max-w-sm flex flex-col gap-4 transition-theme focus:outline-none"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Edit Profile"
+                    >
                         <h2 className="font-bold text-lg text-foreground">Edit Profile</h2>
                         {updateError && <div className="text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 p-2 rounded">{updateError}</div>}
                         {updateSuccess && <div className="text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/20 p-2 rounded">{updateSuccess}</div>}
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-semibold text-foreground">Username</label>
+                            <label className="text-sm font-semibold text-foreground" htmlFor="edit-display-name">Username</label>
                             <input
+                                id="edit-display-name"
                                 type="text"
                                 className="input-fields"
                                 value={editData.displayName}
@@ -270,17 +281,29 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                                 onChange={e => setEditData({ ...editData, displayName: e.target.value })}
                                 placeholder="Your username"
                                 required
+                                autoFocus
                             />
                         </div>
-                        {/* Photo upload removed */}
-                        <div className="flex gap-3 justify-end">
-                            <button type="button" className="hover:cursor-pointer hover:scale-105 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded bg-gray-200 dark:bg-neutral-700 hover:bg-gray-300 dark:hover:bg-neutral-600 w-28 transition-colors" onClick={() => setShowEditModal(false)} disabled={updating}>Cancel</button>
-                            <button type="submit" className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded button-bg text-white disabled:opacity-70 w-28" disabled={updating}>
+                        <div className="flex gap-3 justify-end pt-2">
+                            <button
+                                type="button"
+                                className="button-no-brand inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded bg-gray-200 dark:bg-neutral-700 hover:bg-gray-300 dark:hover:bg-neutral-600 w-28 transition-colors"
+                                onClick={() => setShowEditModal(false)}
+                                disabled={updating}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="brand-btn inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded button-bg text-white disabled:opacity-70 w-28"
+                                disabled={updating}
+                            >
                                 {updating ? 'Saving...' : <><FaSave className="text-white" size={14} /> Save</>}
                             </button>
                         </div>
                     </form>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     )

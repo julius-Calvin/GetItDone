@@ -26,6 +26,7 @@
     --surface: #1a1a1a;
     --surface-alt: #101010;
     --border-color: #2a2a2a;
+    --brand: #A23E48;
     --button-no-brand:black;
   }
 }
@@ -48,6 +49,7 @@
   --surface: #FFFFFF;
   --surface-alt: #F3F1F1;
   --border-color: #D9D9D9;
+  --brand: #A23E48;
   --button-no-brand:black;
 }
 
