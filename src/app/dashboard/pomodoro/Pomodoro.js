@@ -67,7 +67,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
             pattern="[0-9]*"
             value={local.pomodoro}
             onChange={onNumericChange('pomodoro')}
-            className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-[#A23E48] focus:border-[#A23E48] transition-all duration-300 ease-in-out"
+            className="input-fields w-full"
           />
         </div>
         <div>
@@ -78,7 +78,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
             pattern="[0-9]*"
             value={local.shortBreak}
             onChange={onNumericChange('shortBreak')}
-            className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-[#A23E48] focus:border-[#A23E48] transition-all duration-300 ease-in-out"
+            className="input-fields w-full"
           />
         </div>
         <div>
@@ -89,7 +89,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
             pattern="[0-9]*"
             value={local.longBreak}
             onChange={onNumericChange('longBreak')}
-            className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-[#A23E48] focus:border-[#A23E48] transition-all duration-300 ease-in-out"
+            className="input-fields w-full"
           />
         </div>
         <div>
@@ -100,7 +100,7 @@ function SettingsPanel({ settings, onSave, isLoading }) {
             pattern="[0-9]*"
             value={local.longBreakInterval}
             onChange={onNumericChange('longBreakInterval')}
-            className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-[#A23E48] focus:border-[#A23E48] transition-all duration-300 ease-in-out"
+            className="input-fields w-full"
           />
         </div>
         <div className="flex items-center">
@@ -543,16 +543,16 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                   onClick={resetTimer}
                   className="bg-gray-200 dark:bg-neutral-700 p-4 rounded-full hover:bg-gray-300 dark:hover:bg-neutral-600 transition-colors"
                 >
-                  <FaRedo className="w-6 h-6 text-gray-700" />
+                  <FaRedo className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                 </button>
               </div>
 
               <div className="text-center text-gray-600 dark:text-gray-300 mb-6">
-                <p>Completed: {cycles} {cycles === 1 ? 'session' : 'sessions'}</p>
+                <p className="text-foreground">Completed: {cycles} {cycles === 1 ? 'session' : 'sessions'}</p>
                 {selectedTaskId && !availableTasks.find(t => t.id === selectedTaskId)?.isFinished && (
                   <div className="mt-4 text-center">
-                    <p className="font-semibold mb-2">Current Task:</p>
-                    <p>{availableTasks.find(task => task.id === selectedTaskId)?.title}</p>
+                    <p className="font-semibold mb-2 text-foreground">Current Task:</p>
+                    <p className="text-foreground">{availableTasks.find(task => task.id === selectedTaskId)?.title}</p>
                     <button
                       onClick={handleTaskCompletion}
                       disabled={completingId === selectedTaskId}
@@ -601,8 +601,8 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
 
         {availableTasks.length === 0 ? (
           <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-            <p>No tasks available</p>
-            <p className="mt-2 text-sm">Add one now to start focusing</p>
+            <p className="text-foreground">No tasks available</p>
+            <p className="mt-2 text-sm text-foreground">Add one now to start focusing</p>
             <button
               type="button"
               onClick={handleOpenAdd}
@@ -624,11 +624,13 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                 const isSelected = task.id === selectedTaskId;
                 const isChecked = task.isFinished || isSelected;
                 const base = 'p-3 rounded-md transition-colors';
+                // --- REWRITE: Use brand color for unfinished tasks, not white ---
                 const interactive = task.isFinished
-                  ? 'bg-gray-100 dark:bg-neutral-800/60 opacity-50 cursor-not-allowed'
+                  ? 'bg-gray-100 dark:bg-neutral-800/70 opacity-50 cursor-not-allowed dark:text-neutral-300'
                   : isSelected
                     ? 'bg-[#A23E48] text-white cursor-pointer'
-                    : 'bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 cursor-pointer';
+                    : 'text-white bg-[#A23E48]/50 dark:bg-[#A23E48]/20 hover:bg-[#A23E48]/80 dark:hover:bg-[#A23E48]/30 cursor-pointer border border-[#A23E48]/20 dark:border-[#A23E48]/30 dark:text-[#A23E48]';
+                // ^^^^
                 return (
                   <div
                     key={task.id}
@@ -655,7 +657,7 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
                       <div>
                         <h3 className="font-medium">{task.title}</h3>
                         {task.description && (
-                          <p className={`text-sm ${isSelected ? 'text-white/80' : 'text-gray-600 dark:text-gray-300'}`}>
+                          <p className={`text-sm ${isSelected ? 'text-white/80' : 'text-white/60'}`}>
                             {task.description}
                           </p>
                         )}
@@ -671,30 +673,30 @@ const PomodoroTimer = ({ tasks = [], isLoading: _pageLoading = false, userId }) 
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <form onSubmit={handleAddTask} className="bg-surface-alt dark:bg-[#1f1f1f] rounded-lg p-6 shadow-lg w-full max-w-sm flex flex-col gap-4 transition-theme">
             <h2 className="font-bold text-lg text-[#A23E48]">Add Focus Task</h2>
-            {addError && <div className="text-sm text-red-600 bg-red-100 p-2 rounded">{addError}</div>}
+            {addError && <div className="text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 p-2 rounded">{addError}</div>}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold">Title</label>
-              <input
-                className="input-fields focus:ring-2 focus:ring-[#A23E48]/40"
-                value={newTitle}
-                onChange={e => setNewTitle(e.target.value)}
-                placeholder="Task title"
-                maxLength={120}
-                disabled={adding}
-                required
-              />
+              <label className="text-sm font-semibold text-foreground">Title</label>
+                              <input
+                  className="input-fields"
+                  value={newTitle}
+                  onChange={e => setNewTitle(e.target.value)}
+                  placeholder="Task title"
+                  maxLength={120}
+                  disabled={adding}
+                  required
+                />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold">Description</label>
-              <textarea
-                className="input-fields resize-none focus:ring-2 focus:ring-[#A23E48]/40"
-                value={newDescription}
-                onChange={e => setNewDescription(e.target.value)}
-                placeholder="Optional description"
-                rows={3}
-                maxLength={500}
-                disabled={adding}
-              />
+              <label className="text-sm font-semibold text-foreground">Description</label>
+                              <textarea
+                  className="input-fields resize-none"
+                  value={newDescription}
+                  onChange={e => setNewDescription(e.target.value)}
+                  placeholder="Optional description"
+                  rows={3}
+                  maxLength={500}
+                  disabled={adding}
+                />
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <button

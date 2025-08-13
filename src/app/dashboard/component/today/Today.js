@@ -46,7 +46,7 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
         <div
             ref={setNodeRef}
             style={style}
-            className={`${task?.isFinished ? 'opacity-50 ' : ''} bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02]'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
+            className={`${task?.isFinished ? 'opacity-50 ' : ''} bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
         >
             {editIdx === index ? (
                 // Edit form - centered layout
@@ -171,12 +171,12 @@ const DeleteConfirmationAlert = ({ isOpen, onClose, onConfirm, title, message, i
 
     return (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => { if (!isProcessing) onClose(); }}>
-            <div className="bg-[#F3F1F1] rounded-lg p-6 shadow-lg w-[350px] flex flex-col gap-4" onClick={e => e.stopPropagation()}>
+            <div className="bg-[#F3F1F1] dark:bg-[#1e1e1e] rounded-lg p-6 shadow-lg w-[350px] flex flex-col gap-4 transition-theme" onClick={e => e.stopPropagation()}>
                 <h2 className="text-lg font-bold text-[#A23E48]">{title}</h2>
-                <p className="text-gray-700">{message}</p>
+                <p className="text-gray-700 dark:text-gray-300">{message}</p>
                 <div className="flex justify-end gap-3 mt-2">
                     <button
-                        className="hover:cursor-pointer font-bold px-4 rounded-lg py-2 bg-gray-300 hover:bg-gray-400/50 hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="hover:cursor-pointer font-bold px-4 rounded-lg py-2 bg-gray-300 dark:bg-neutral-700 hover:bg-gray-400/50 dark:hover:bg-neutral-600 hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
                         onClick={onClose}
                         disabled={isProcessing}
                     >
@@ -554,7 +554,7 @@ export const Today = () => {
         return (
             <div className="flex flex-col card-shadow p-5 rounded-lg bg-surface-alt dark:bg-[#1f1f1f] mt-5 transition-theme">
                 <div className="flex justify-between items-center mb-3">
-                    <h1 className="font-bold text-xl">Finished</h1>
+                    <h1 className="font-bold text-xl text-foreground">Finished</h1>
                     {finishedTasks.length > 0 && (
                         <button
                             onClick={confirmDeleteAllTasks}
@@ -598,7 +598,7 @@ export const Today = () => {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-gray-500 italic">No finished tasks yet</p>
+                    <p className="text-gray-500 dark:text-gray-400 italic">No finished tasks yet</p>
                 )}
 
                 {/* Render the custom alert component */}
@@ -625,7 +625,7 @@ export const Today = () => {
             <div className="w-full p-5 md:p-7 dark:bg-[#161616] transition-theme border-b border-transparent dark:border-neutral-800/80">
                 <div className="flex flex-col gap-2">
                     <span className="text-3xl md:text-4xl font-bold flex flex-row gap-2">
-                        <h1> Hello,</h1>
+                        <h1 className="text-foreground"> Hello,</h1>
                         <h1 className="text-[#A23E48]">
                             {userInfo.displayName ? userInfo.displayName.split(' ')[0] : ''}
                         </h1>
@@ -641,7 +641,7 @@ export const Today = () => {
                 <div className="flex-1">
                     <div className="p-4 md:p-5 flex flex-col bg-surface-alt dark:bg-[#1f1f1f] card-shadow rounded-lg transition-theme">
                         <div className="mb-2">
-                            <h1 className="font-bold text-lg md:text-xl ">Finish your task!</h1>
+                            <h1 className="font-bold text-lg md:text-xl text-foreground">Finish your task!</h1>
                         </div>
                         {isLoading || !isAuthResolved ? (
                             <LoadingPage message="Loading data..." useFullScreen={false} />
@@ -679,7 +679,7 @@ export const Today = () => {
                                     className="bg-surface-alt dark:bg-[#1e1e1e] rounded-lg p-8 shadow-lg w-[350px] flex flex-col gap-4 transition-theme"
                                     onSubmit={handleAddTask}
                                 >
-                                    <h2 className="text-lg font-bold mb-2">Add Task</h2>
+                                    <h2 className="text-lg font-bold mb-2 text-foreground">Add Task</h2>
                                     <input
                                         className="input-fields mb-2 w-full"
                                         placeholder="Title"
@@ -695,7 +695,7 @@ export const Today = () => {
                                         onChange={(e) => setDescription(e.target.value)}
                                         disabled={isSaving}
                                     />
-                                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                                    {error && <p className="text-red-500 dark:text-red-400 text-sm">{error}</p>}
                                     <div className="flex justify-end gap-2">
                                         <button
                                             className="px-4 rounded-lg py-2 bg-gray-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 hover:scale-105 hover:bg-gray-400/70 hover:cursor-pointer transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"

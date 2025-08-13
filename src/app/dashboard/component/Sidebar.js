@@ -119,7 +119,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                         <button
                             onClick={() => setActiveView(activeView)}
                             aria-label="Close navigation menu"
-                            className="p-2 rounded-md bg-white flex items-center justify-center text-gray-700 hover:bg-gray-100 shadow"
+                            className="p-2 rounded-md bg-white dark:bg-neutral-700 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-600 shadow transition-colors"
                         >
                             <RxCross2 className="w-4 h-4" />
                         </button>
@@ -136,7 +136,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                             sizes="24px"
                         />
                     </div>
-                    <span className="font-bold select-none text-sm md:text-base truncate" title={userInfo.displayName || 'No Username'}>
+                    <span className="font-bold select-none text-sm md:text-base truncate text-foreground" title={userInfo.displayName || 'No Username'}>
                         {isLoading ? 'Fetching username.....' : (userInfo.displayName || 'No Username')}
                     </span>
                         <button
@@ -153,7 +153,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                 <div className="flex flex-col gap-1 flex-grow">
                     {/* Today task - Target icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-900'} text-sm md:text-base`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'today' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-900 text-foreground'} text-sm md:text-base`}
                         onClick={() => {
                             setActiveView('today')
                         }}
@@ -174,7 +174,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
 
                     {/* Tomorrow - Calendar icon */}
                     <div
-                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-800/70 dark:hover:text-white/90'} text-sm md:text-base`}
+                        className={`flex flex-row gap-3 pl-3 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tomorrow' ? 'sidebar-menu-active text-white' : 'hover:bg-neutral-300 dark:hover:bg-neutral-800/70 dark:hover:text-white/90 text-foreground'} text-sm md:text-base`}
                         onClick={() => setActiveView('tomorrow')}
                     >
                         <svg
@@ -236,7 +236,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                 {/* Error Display */}
                 {error && (
                     <div className="mt-2 mb-4 w-full px-3">
-                        <div className="p-2 text-center rounded-lg text-white bg-red-600 text-sm">
+                        <div className="p-2 text-center rounded-lg text-white bg-red-600 dark:bg-red-700 text-sm">
                             {error}
                         </div>
                     </div>
@@ -256,12 +256,12 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
             {/* Edit Modal (center of viewport) */}
             {showEditModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-                    <form onSubmit={handleProfileUpdate} className="bg-surface p-6 rounded-lg shadow-lg w-full max-w-sm flex flex-col gap-4 transition-theme">
-                        <h2 className="font-bold text-lg">Edit Profile</h2>
-                        {updateError && <div className="text-sm text-red-600 bg-red-100 p-2 rounded">{updateError}</div>}
-                        {updateSuccess && <div className="text-sm text-green-600 bg-green-100 p-2 rounded">{updateSuccess}</div>}
+                    <form onSubmit={handleProfileUpdate} className="bg-surface dark:bg-[#1e1e1e] p-6 rounded-lg shadow-lg w-full max-w-sm flex flex-col gap-4 transition-theme">
+                        <h2 className="font-bold text-lg text-foreground">Edit Profile</h2>
+                        {updateError && <div className="text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 p-2 rounded">{updateError}</div>}
+                        {updateSuccess && <div className="text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/20 p-2 rounded">{updateSuccess}</div>}
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-semibold">Username</label>
+                            <label className="text-sm font-semibold text-foreground">Username</label>
                             <input
                                 type="text"
                                 className="input-fields"
@@ -274,7 +274,7 @@ export default function Sidebar({ activeView, setActiveView, isLoading, setIsLoa
                         </div>
                         {/* Photo upload removed */}
                         <div className="flex gap-3 justify-end">
-                            <button type="button" className="hover:cursor-pointer hover:scale-105 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded bg-gray-200 hover:bg-gray-300 w-28" onClick={() => setShowEditModal(false)} disabled={updating}>Cancel</button>
+                            <button type="button" className="hover:cursor-pointer hover:scale-105 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded bg-gray-200 dark:bg-neutral-700 hover:bg-gray-300 dark:hover:bg-neutral-600 w-28 transition-colors" onClick={() => setShowEditModal(false)} disabled={updating}>Cancel</button>
                             <button type="submit" className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded button-bg text-white disabled:opacity-70 w-28" disabled={updating}>
                                 {updating ? 'Saving...' : <><FaSave className="text-white" size={14} /> Save</>}
                             </button>

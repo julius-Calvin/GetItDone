@@ -81,7 +81,7 @@ const SortableTaskItem = ({
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
+            className={`bg-[#A23E48] dark:bg-gradient-to-br dark:from-[#A23E48] dark:to-[#7d2d35] rounded-lg p-4 text-white transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20 ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
         >
             {editIdx === index ? (
                 // Edit form - centered layout
@@ -881,7 +881,7 @@ export const Tomorrow = () => {
                             {error && <p className="text-red-500 text-sm">{error}</p>}
                             <div className="flex justify-end gap-2">
                                 <button
-                                    className="px-4 rounded-lg py-2 bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="px-4 rounded-lg py-2 bg-gray-300 dark:bg-neutral-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                                     onClick={() => {
                                         setShowModal(false);
                                         setModalType('');
@@ -922,7 +922,7 @@ export const Tomorrow = () => {
                             <div className="flex justify-end gap-2">
                                 <button
                                     type="button"
-                                    className="font-bold hover:cursor-pointer hover:scale-105 px-4 py-2 rounded-lg bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="font-bold hover:cursor-pointer hover:scale-105 px-4 py-2 rounded-lg bg-gray-300 dark:bg-neutral-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                                     onClick={handleDeleteCancel}
                                     disabled={deleteAlert.isProcessing}
                                 >

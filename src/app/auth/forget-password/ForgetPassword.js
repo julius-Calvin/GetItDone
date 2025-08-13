@@ -78,25 +78,25 @@ export default function ForgetPassword () {
                             />
                         </button>
                         <div className="text-center w-full">
-                            <h1 className="text-center font-bold">FORGET PASSWORD?</h1>
+                            <h1 className="text-center font-bold text-foreground">FORGET PASSWORD?</h1>
                         </div>
                     </div>
                     
                     {/* Alert to show message and error */}
                     {message && (
-                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80 dark:bg-green-700/80">
                             {message}
                         </div>
                     )}
                     {error && (
-                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80 dark:bg-red-700/80">
                             {error}
                         </div>
                     )}
                     {/*Input fields*/}
                     <div className="flex flex-col gap-2">
                         <div className="flex flex-col">
-                            <label>Email</label>
+                            <label className="text-foreground">Email</label>
                             <input 
                             type='email'
                             name="email"

@@ -93,24 +93,24 @@ export default function LoginPage () {
                 <div className="flex flex-col bg-surface dark:bg-[#1b1b1b] p-8 rounded-lg card-shadow gap-5 border border-base transition-theme">
                     <div className="flex flex-row">
                         <button type="button" onClick={goToHome} className="hover:cursor-pointer hover:scale-105 transition duration-300 ease-in-out"><Image src="/back-button.svg" alt="Back" width={20} height={20} className="w-5" /></button>
-                        <span className="flex text-center w-full"><h1 className="font-bold w-full">WELCOME BACK</h1></span>
+                        <span className="flex text-center w-full"><h1 className="font-bold w-full text-foreground">WELCOME BACK</h1></span>
                     </div>
                     
                     {/* Alert to show message and error */}
                     {message && (
-                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80 dark:bg-green-700/80">
                             {message}
                         </div>
                     )}
                     {error && (
-                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80 dark:bg-red-700/80">
                             {error}
                         </div>
                     )}
                     {/*Input fields*/}
                     <div className="flex flex-col gap-2">
                         <div className="flex flex-col">
-                            <label>Email</label>
+                            <label className="text-foreground">Email</label>
                             <input 
                                 type="email"
                                 name="email"
@@ -122,7 +122,7 @@ export default function LoginPage () {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label>Password</label>
+                            <label className="text-foreground">Password</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -136,7 +136,7 @@ export default function LoginPage () {
                                 <button
                                     type="button"
                                     onClick={togglePasswordVisibility}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition-colors"
                                 >
                                     {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                                 </button>
@@ -156,13 +156,13 @@ export default function LoginPage () {
                         <button type="submit" className="button-bg">
                             Sign in
                         </button>
-                        <p className="text-center">or</p>
+                        <p className="text-center text-foreground">or</p>
                         
                         {/* Google */}
                         <GoogleButton setIsLoading={setIsLoading} />
                        
             <span className="gap-1 justify-center text-center text-sm flex flex-row ">
-                            <p>Don&apos;t have an account?</p>
+                            <p className="text-foreground">Don&apos;t have an account?</p>
                             <Link
                                 className="text-sm hover:underline text-[#A23E48] cursor-pointer text-center"
                                 href="/auth/register"

@@ -115,22 +115,22 @@ export default function RegisterPage() {
         <div className="flex items-center justify-center min-h-screen bg-surface-alt dark:bg-[#121212] transition-theme px-4 py-8">
             <form onSubmit={formSubmit} className="w-full max-w-sm mx-auto">
                 <div className="flex flex-col bg-surface dark:bg-[#1b1b1b] p-8 rounded-lg card-shadow gap-5 border border-base transition-theme">
-                    <h1 className="text-center font-bold">WELCOME</h1>
+                    <h1 className="text-center font-bold text-foreground">WELCOME</h1>
                     {/* Alert to show message and error */}
                     {message && (
-                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-green-600/80 dark:bg-green-700/80">
                             {message}
                         </div>
                     )}
                     {error && (
-                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80">
+                        <div className="p-2 text-center rounded-lg text-white bg-red-600/80 dark:bg-red-700/80">
                             {error}
                         </div>
                     )}
                     {/*Input fields*/}
                     <div className="flex flex-col gap-2">
                         <div className="flex flex-col">
-                            <label>Username</label>
+                            <label className="text-foreground">Username</label>
                             <input
                                 name="username"
                                 type="text"
@@ -142,7 +142,7 @@ export default function RegisterPage() {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label>Email</label>
+                            <label className="text-foreground">Email</label>
                             <input
                                 name="email"
                                 type="email"
@@ -154,7 +154,7 @@ export default function RegisterPage() {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label>Password</label>
+                            <label className="text-foreground">Password</label>
                             <div className="relative">
                                 <input
                                     name="password"
@@ -168,14 +168,14 @@ export default function RegisterPage() {
                                 <button
                                     type="button"
                                     onClick={togglePasswordVisibility}
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200"
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition-colors duration-200"
                                 >
                                     {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                                 </button>
                             </div>
                         </div>
                         <div className="flex flex-col">
-                            <label>Confirm Password</label>
+                            <label className="text-foreground">Confirm Password</label>
                             <div className="relative">
                                 <input
                                     type={showConfirmPassword ? "text" : "password"}
@@ -189,7 +189,7 @@ export default function RegisterPage() {
                                 <button
                                     type="button"
                                     onClick={toggleConfirmPasswordVisibility}
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200"
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition-colors duration-200"
                                 >
                                     {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                                 </button>
@@ -200,13 +200,13 @@ export default function RegisterPage() {
                     {/*Button Sign in and Google Sign in*/}
                     <div className="flex flex-col gap-2">
                         <button type="submit" className="button-bg">Register</button>
-                        <p className="text-center">or</p>
+                        <p className="text-center text-foreground">or</p>
 
                        {/* Google */}
                        <GoogleButton />
 
             <span className="gap-1 justify-center text-center text-sm flex flex-row ">
-                            <p>Already have an account?</p>
+                            <p className="text-foreground">Already have an account?</p>
                             <Link
                                 className="text-sm hover:underline text-[#A23E48] cursor-pointer text-center"
                                 href='/auth/sign-in'
