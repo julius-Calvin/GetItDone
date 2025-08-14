@@ -201,3 +201,61 @@ body {
 .sidebar-menu-active {
   background-color: #A23E48;
 }
+
+/* Mobile Drag and Drop Enhancements */
+@media (max-width: 768px) {
+  /* Increase touch target size for drag handles on mobile */
+  .drag-handle-mobile {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Improve dragging experience on mobile */
+  .draggable-item-mobile {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Enhance visual feedback during drag on mobile */
+  .dragging-mobile {
+    opacity: 0.8;
+    transform: scale(1.05) rotate(3deg);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+  }
+
+  /* Smooth transitions for mobile interactions */
+  .sortable-item-mobile {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+
+  /* Prevent scrolling while dragging on mobile */
+  .dnd-context-mobile {
+    touch-action: none;
+    overflow: hidden;
+  }
+}
+
+/* Touch-friendly styles for all screen sizes */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection during drag operations */
+.no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

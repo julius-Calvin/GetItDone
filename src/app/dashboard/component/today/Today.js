@@ -14,7 +14,7 @@ import { BsGripVertical } from "react-icons/bs";
 import { deleteTask } from "@/app/api/note-api";
 import LoadingPage from "@/app/loading-comp/LoadingPage";
 import React from "react";
-import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { KeyboardSensor, PointerSensor, TouchSensor, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -46,7 +46,7 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
         <div
             ref={setNodeRef}
             style={style}
-            className={`${task?.isFinished ? 'opacity-50 ' : ''} bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
+            className={`${task?.isFinished ? 'opacity-50 ' : ''} bg-[#A23E48] rounded-lg p-4 text-white transition-all duration-300 ease-out ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2 z-50 dragging-mobile' : ''} select-none draggable-item-mobile sortable-item-mobile`}
         >
             {editIdx === index ? (
                 // Edit form - centered layout
@@ -128,9 +128,10 @@ const SortableTaskItem = ({ task, index, editIdx, handleEditClick, handleTaskFin
                             <div
                                 {...attributes}
                                 {...listeners}
-                                className="w-4 h-4 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing"
+                                className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing touch-manipulation select-none drag-handle-mobile"
+                                style={{ touchAction: 'none' }}
                             >
-                                <BsGripVertical className="w-4 h-4" />
+                                <BsGripVertical className="w-5 h-5" />
                             </div>
                         )}
 
@@ -216,11 +217,17 @@ export const Today = () => {
     const [error, setError] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
 
-    // DnD sensors
+    // Mobile-optimized DnD sensors
     const sensors = useSensors(
-        useSensor(PointerSensor, {
+        useSensor(MouseSensor, {
             activationConstraint: {
-                distance: 8,
+                distance: 10,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 10,
             },
         }),
         useSensor(KeyboardSensor, {

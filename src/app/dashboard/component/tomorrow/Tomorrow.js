@@ -26,7 +26,8 @@ import {
     DndContext,
     closestCenter,
     KeyboardSensor,
-    PointerSensor,
+    TouchSensor,
+    MouseSensor,
     useSensor,
     useSensors,
 } from '@dnd-kit/core';
@@ -81,7 +82,7 @@ const SortableTaskItem = ({
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-[#A23E48] dark:bg-gradient-to-br dark:from-[#A23E48] dark:to-[#7d2d35] rounded-lg p-4 text-white transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20 ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
+            className={`bg-[#A23E48] dark:bg-gradient-to-br dark:from-[#A23E48] dark:to-[#7d2d35] rounded-lg p-4 text-white transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20 ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2 z-50 dragging-mobile' : ''} select-none draggable-item-mobile sortable-item-mobile`}
         >
             {editIdx === index ? (
                 // Edit form - centered layout
@@ -144,9 +145,10 @@ const SortableTaskItem = ({
                         <div
                             {...attributes}
                             {...listeners}
-                            className="w-4 h-4 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing"
+                            className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing touch-manipulation select-none drag-handle-mobile"
+                            style={{ touchAction: 'none' }}
                         >
-                            <BsGripVertical className="w-4 h-4" />
+                            <BsGripVertical className="w-5 h-5" />
                         </div>
                         <div>
                             <h4 className="font-bold">{task.title}</h4>
@@ -222,7 +224,7 @@ const TaskList = ({
             items={tasks.map(task => `${taskType}-${task.id}`)}
             strategy={verticalListSortingStrategy}
         >
-            <div className="space-y-4">
+            <div className="space-y-4 dnd-context-mobile">
                 {tasks.map((task, index) => (
                     <SortableTaskItem
                         key={task.id}
@@ -320,11 +322,22 @@ export const Tomorrow = () => {
     const tomorrowInputRef = useRef(null);
     const tomorrowTextareaRef = useRef(null);
 
-    // DnD sensors configuration
-    // Stable sensors instance (length/order never changes)
+    // Mobile-optimized DnD sensors configuration
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+        useSensor(MouseSensor, { 
+            activationConstraint: { 
+                distance: 10 
+            } 
+        }),
+        useSensor(TouchSensor, { 
+            activationConstraint: { 
+                delay: 250, 
+                tolerance: 10 
+            } 
+        }),
+        useSensor(KeyboardSensor, { 
+            coordinateGetter: sortableKeyboardCoordinates 
+        })
     );
 
     /**

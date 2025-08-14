@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { DndContext, closestCenter } from '@dnd-kit/core';
+import { DndContext, closestCenter, TouchSensor, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -43,7 +43,7 @@ const SortableTaskItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`${task?.isFinished ? 'opacity-50 ' : ''} rounded-lg p-4 text-white transition-all duration-300 ease-out bg-[#A23E48] dark:bg-gradient-to-br dark:from-[#A23E48] dark:to-[#7d2d35] ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2' : ''}`}
+      className={`${task?.isFinished ? 'opacity-50 ' : ''} rounded-lg p-4 text-white transition-all duration-300 ease-out bg-[#A23E48] dark:bg-gradient-to-br dark:from-[#A23E48] dark:to-[#7d2d35] ${task?.isFinished ? '' : 'hover:shadow-lg hover:scale-[1.02] dark:hover:shadow-[#A23E48]/20'} ${isDragging ? 'opacity-60 scale-98 shadow-2xl rotate-2 z-50 dragging-mobile' : ''} select-none draggable-item-mobile sortable-item-mobile`}
     >
       {editIdx === index ? (
         <form onSubmit={onSave} className="w-full">
@@ -114,9 +114,10 @@ const SortableTaskItem = ({
               <div
                 {...attributes}
                 {...listeners}
-                className="w-4 h-4 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing"
+                className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing touch-manipulation select-none drag-handle-mobile"
+                style={{ touchAction: 'none' }}
               >
-                <BsGripVertical className="w-4 h-4" />
+                <BsGripVertical className="w-5 h-5" />
               </div>
             )}
 
@@ -146,6 +147,23 @@ export const TaskList = ({ tasks, setTasks, editIdx, setEditIdx, sensors, onDrag
   const [localTitle, setLocalTitle] = useState('');
   const [localDescription, setLocalDescription] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  // Mobile-optimized sensors
+  const mobileSensors = useSensors(
+    useSensor(MouseSensor, {
+      // Require the mouse to move by 10 pixels before activating
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      // Press delay of 250ms, with tolerance of 10px of movement
+      activationConstraint: {
+        delay: 250,
+        tolerance: 10,
+      },
+    })
+  );
 
   const unfinishedTask = tasks.filter((task) => !task.isFinished);
 
@@ -204,9 +222,13 @@ export const TaskList = ({ tasks, setTasks, editIdx, setEditIdx, sensors, onDrag
   };
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+    <DndContext 
+      sensors={mobileSensors} 
+      collisionDetection={closestCenter} 
+      onDragEnd={onDragEnd}
+    >
       <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-4">
+        <div className="space-y-4 dnd-context-mobile">
           {unfinishedTask.map((task, index) => (
             <SortableTaskItem
               key={task.id}
