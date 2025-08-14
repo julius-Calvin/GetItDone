@@ -195,7 +195,15 @@ export const TaskList = ({ tasks, setTasks, editIdx, setEditIdx, sensors, onDrag
     if (editIdx !== null) {
       try {
         const taskId = unfinishedTask[editIdx].id;
-        const updatedData = { title: localTitle, description: localDescription };
+        const originalTask = unfinishedTask[editIdx];
+        // Preserve the original date field and other important fields
+        const updatedData = { 
+          title: localTitle, 
+          description: localDescription,
+          date: originalTask.date, // Preserve the original date
+          rank: originalTask.rank, // Preserve the original rank
+          isFinished: originalTask.isFinished // Preserve completion status
+        };
         await updateTask(taskId, updatedData);
 
         const updatedTasks = tasks.map((t) => (t.id === taskId ? { ...t, ...updatedData } : t));
@@ -213,7 +221,13 @@ export const TaskList = ({ tasks, setTasks, editIdx, setEditIdx, sensors, onDrag
     e.preventDefault();
     try {
       const taskId = unfinishedTask[idx].id;
-      const updatedData = { ...unfinishedTask[idx], isFinished: true };
+      const originalTask = unfinishedTask[idx];
+      // Preserve all original data when marking as finished
+      const updatedData = { 
+        ...originalTask, 
+        isFinished: true,
+        date: originalTask.date // Explicitly preserve the date
+      };
       await updateTask(taskId, updatedData);
       setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedData : t)));
     } catch (error) {

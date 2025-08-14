@@ -291,49 +291,41 @@ export const Today = () => {
     }, [user, isAuthResolved]);
 
     // Schedule daily rollover at local midnight while Today component is mounted
+    // Note: This is a backup rollover in case Tomorrow component is not mounted
     useEffect(() => {
         if (!isAuthResolved || !user) return;
 
         // Track last rollover date in localStorage to prevent duplicate moves if component remounts shortly after midnight
-        const lastKey = 'lastTomorrowRolloverDate';
-
-        const scheduleNextMidnight = () => {
-            const now = new Date();
-            const next = new Date(now);
-            next.setHours(24, 0, 0, 0); // next local midnight
-            const delay = next.getTime() - now.getTime();
-            const timeoutId = setTimeout(async () => {
-                try {
-                    const todayStr = new Date().toDateString();
-                    const last = (typeof window !== 'undefined') ? localStorage.getItem(lastKey) : null;
-                    if (last !== todayStr) {
-                        await rolloverTomorrowTasksToToday(user.uid);
-                        if (typeof window !== 'undefined') {
-                            localStorage.setItem(lastKey, todayStr);
-                        }
-                        const refreshed = await getTodayTasks(user.uid);
-                        setTasks(refreshed || []);
+        const lastKey = `lastTomorrowRolloverDate_${user.uid}`;
+        
+        // Check if we missed a rollover immediately (backup check)
+        const checkMissedRollover = async () => {
+            try {
+                const todayStr = new Date().toDateString();
+                const last = (typeof window !== 'undefined') ? localStorage.getItem(lastKey) : null;
+                if (last !== todayStr) {
+                    console.log('Today component: Checking for missed rollover...');
+                    const result = await rolloverTomorrowTasksToToday(user.uid);
+                    if (result.moved > 0) {
+                        console.log(`Today component: Performed missed rollover, moved ${result.moved} tasks`);
+                        const data = await getTodayTasks(user.uid);
+                        setTasks(data || []);
                     }
-                } catch (e) {
-                    console.error('Midnight rollover failed:', e);
-                }
-                scheduleNextMidnight();
-            }, Math.max(0, delay));
-            return timeoutId;
-        };
-        // Also attempt a rollover immediately if day changed while app closed
-        try {
-            const todayStr = new Date().toDateString();
-            const last = (typeof window !== 'undefined') ? localStorage.getItem(lastKey) : null;
-            if (last !== todayStr) {
-                rolloverTomorrowTasksToToday(user.uid).then(() => {
                     if (typeof window !== 'undefined') localStorage.setItem(lastKey, todayStr);
-                    getTodayTasks(user.uid).then(data => setTasks(data || []));
-                }).catch(() => { });
+                }
+            } catch (e) {
+                console.error('Today component: Failed to check/perform missed rollover:', e);
             }
-        } catch { /* ignore */ }
-        const id = scheduleNextMidnight();
-        return () => clearTimeout(id);
+        };
+
+        // Only check for missed rollover, don't schedule future ones
+        // The Tomorrow component will handle the scheduling
+        checkMissedRollover();
+        
+        // No timeout scheduling here to avoid conflicts with Tomorrow component
+        return () => {
+            console.log('Today component: Rollover check cleanup');
+        };
     }, [isAuthResolved, user]);
 
     // Handle edit button click
@@ -393,9 +385,12 @@ export const Today = () => {
                     rank: index + 1
                 }));
 
-                // Update all tasks in the database
+                // Update all tasks in the database - preserve date field
                 const updatePromises = updatedTasks.map(task =>
-                    updateTask(task.id, { rank: task.rank })
+                    updateTask(task.id, { 
+                        rank: task.rank,
+                        date: task.date || 'today' // Ensure date is preserved
+                    })
                 );
 
                 Promise.all(updatePromises).catch(error => {

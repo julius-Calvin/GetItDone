@@ -351,6 +351,16 @@ export const Tomorrow = () => {
 
             const userId = user.uid;
 
+            // Check if rollover has already been done today using localStorage
+            const lastRolloverKey = `lastRollover_${userId}`;
+            const today = new Date().toDateString();
+            const lastRollover = localStorage.getItem(lastRolloverKey);
+            
+            if (lastRollover === today) {
+                console.log('Rollover already completed today, skipping...');
+                return;
+            }
+
             // Fetch latest to avoid acting on stale state
             const [latestToday, latestTomorrow] = await Promise.all([
                 getTodayTasks(userId),
@@ -358,8 +368,12 @@ export const Tomorrow = () => {
             ]);
 
             if (!latestTomorrow || latestTomorrow.length === 0) {
+                // Still mark as completed even if no tasks to move
+                localStorage.setItem(lastRolloverKey, today);
                 return; // Nothing to move
             }
+
+            console.log(`Moving ${latestTomorrow.length} tasks from tomorrow to today...`);
 
             // Determine next rank sequence after current today list
             let nextRank = (latestToday || []).reduce((max, t) => Math.max(max, t?.rank || 0), 0) + 1;
@@ -370,6 +384,9 @@ export const Tomorrow = () => {
             await Promise.all(
                 updates.map(({ id, rank }) => updateTask(id, { date: 'today', rank }))
             );
+
+            // Mark rollover as completed for today
+            localStorage.setItem(lastRolloverKey, today);
 
             // Refresh lists after move
             const [updatedToday, updatedTomorrow] = await Promise.all([
@@ -382,6 +399,8 @@ export const Tomorrow = () => {
             // Reset any edit state referencing old indices
             setTomorrowEditIdx(null);
             setTodayEditIdx(null);
+
+            console.log('Rollover completed successfully');
         } catch (e) {
             console.error('Failed to rollover tasks to today:', e);
             setError('Failed to rollover tasks to today.');
@@ -390,29 +409,21 @@ export const Tomorrow = () => {
 
     /**
      * Schedule rollover at next local midnight and re-arm daily.
+     * Also check for missed rollovers when component mounts.
+     * TEMPORARILY DISABLED FOR DEBUGGING
      */
     useEffect(() => {
         if (!isAuthResolved || !user) return;
 
-        const scheduleNextMidnight = () => {
-            const now = new Date();
-            const next = new Date(now);
-            // Set to next day 00:00:00.000 local time
-            next.setHours(24, 0, 0, 0);
-            const delay = next.getTime() - now.getTime();
-
-            const timeoutId = setTimeout(async () => {
-                await moveTomorrowTasksToToday();
-                // Re-arm for the following midnight
-                scheduleNextMidnight();
-            }, Math.max(0, delay));
-
-            return timeoutId;
+        console.log('Rollover effect disabled for debugging');
+        
+        // TEMPORARY: Disable automatic rollover to debug the issue
+        // The rollover functionality has been temporarily disabled to isolate the problem
+        // where tomorrow tasks are moving to today tasks unexpectedly.
+        
+        return () => {
+            console.log('Rollover cleanup (disabled)');
         };
-
-        const id = scheduleNextMidnight();
-        return () => clearTimeout(id);
-        // Intentionally only depend on auth resolution and user identity to avoid rescheduling on task changes
     }, [isAuthResolved, user]);
 
     /**
@@ -456,9 +467,27 @@ export const Tomorrow = () => {
 
                 setTodayTasks(todayTasks);
                 setTomorrowTasks(tomorrowTasks);
-                console.log('Today tasks:', todayTasks);
-                console.log('Tomorrow tasks:', tomorrowTasks);
+                console.log('Tasks fetched - Today:', todayTasks.length, 'Tomorrow:', tomorrowTasks.length);
+                
+                // Debug: Log the actual tasks and their dates
+                console.log('TODAY TASKS:', todayTasks.map(t => ({ id: t.id, title: t.title, date: t.date })));
+                console.log('TOMORROW TASKS:', tomorrowTasks.map(t => ({ id: t.id, title: t.title, date: t.date })));
+                
+                // Debug: Log any tomorrow tasks that might be mislabeled
+                tomorrowTasks.forEach(task => {
+                    if (task.date !== 'tomorrow') {
+                        console.warn('Found tomorrow task with incorrect date:', task);
+                    }
+                });
+                
+                // Debug: Log any today tasks that might be mislabeled
+                todayTasks.forEach(task => {
+                    if (task.date === 'tomorrow') {
+                        console.warn('Found today task with tomorrow date:', task);
+                    }
+                });
             } catch (error) {
+                console.error('Error fetching tasks:', error);
                 setError("Failed to get your tasks");
             } finally {
                 setIsLoading(false);
@@ -500,9 +529,10 @@ export const Tomorrow = () => {
                 const taskData = {
                     title,
                     description,
-                    date: modalType
+                    date: modalType // Ensure date is explicitly set to modalType ('today' or 'tomorrow')
                 };
 
+                console.log(`Adding ${modalType} task:`, taskData);
                 await addTask(userId, taskData);
                 setTitle("");
                 setDescription("");
@@ -516,10 +546,13 @@ export const Tomorrow = () => {
                 ]);
                 setTodayTasks(todayTasks);
                 setTomorrowTasks(tomorrowTasks);
+                
+                console.log(`Task added successfully. Today: ${todayTasks.length}, Tomorrow: ${tomorrowTasks.length}`);
             } else {
                 setError("Current user is not found.");
             }
         } catch (error) {
+            console.error('Error adding task:', error);
             setError("Failed to add task.");
         } finally {
             setIsSaving(false);
@@ -556,9 +589,12 @@ export const Tomorrow = () => {
                     rank: index + 1
                 }));
 
-                // Update all tasks in the database
+                // Update all tasks in the database - preserve date field
                 const updatePromises = updatedTasks.map(task =>
-                    updateTask(task.id, { rank: task.rank })
+                    updateTask(task.id, { 
+                        rank: task.rank,
+                        date: task.date || 'today' // Ensure date is preserved
+                    })
                 );
 
                 Promise.all(updatePromises).catch(error => {
@@ -590,9 +626,12 @@ export const Tomorrow = () => {
                     rank: index + 1
                 }));
 
-                // Update all tasks in the database
+                // Update all tasks in the database - preserve date field
                 const updatePromises = updatedTasks.map(task =>
-                    updateTask(task.id, { rank: task.rank })
+                    updateTask(task.id, { 
+                        rank: task.rank,
+                        date: task.date || 'tomorrow' // Ensure date is preserved
+                    })
                 );
 
                 Promise.all(updatePromises).catch(error => {
@@ -614,7 +653,15 @@ export const Tomorrow = () => {
             try {
                 setIsSavingTodayEdit(true);
                 const taskId = todayTasks[todayEditIdx].id;
-                const updatedData = { title: todayLocalTitle, description: todayLocalDescription };
+                const originalTask = todayTasks[todayEditIdx];
+                // Preserve the original date and other important fields
+                const updatedData = { 
+                    title: todayLocalTitle, 
+                    description: todayLocalDescription,
+                    date: originalTask.date || 'today', // Ensure date is preserved
+                    rank: originalTask.rank,
+                    isFinished: originalTask.isFinished
+                };
                 await updateTask(taskId, updatedData);
 
                 const updatedTasks = [...todayTasks];
@@ -622,7 +669,9 @@ export const Tomorrow = () => {
 
                 setTodayTasks(updatedTasks);
                 setTodayEditIdx(null);
+                console.log('Today task updated successfully:', updatedData);
             } catch (error) {
+                console.error('Error updating today task:', error);
                 setError("Failed to update task.");
             } finally {
                 setIsSavingTodayEdit(false);
@@ -639,7 +688,15 @@ export const Tomorrow = () => {
             try {
                 setIsSavingTomorrowEdit(true);
                 const taskId = tomorrowTasks[tomorrowEditIdx].id;
-                const updatedData = { title: tomorrowLocalTitle, description: tomorrowLocalDescription };
+                const originalTask = tomorrowTasks[tomorrowEditIdx];
+                // Preserve the original date and other important fields
+                const updatedData = { 
+                    title: tomorrowLocalTitle, 
+                    description: tomorrowLocalDescription,
+                    date: originalTask.date || 'tomorrow', // Ensure date is preserved
+                    rank: originalTask.rank,
+                    isFinished: originalTask.isFinished
+                };
                 await updateTask(taskId, updatedData);
 
                 const updatedTasks = [...tomorrowTasks];
@@ -647,7 +704,9 @@ export const Tomorrow = () => {
 
                 setTomorrowTasks(updatedTasks);
                 setTomorrowEditIdx(null);
+                console.log('Tomorrow task updated successfully:', updatedData);
             } catch (error) {
+                console.error('Error updating tomorrow task:', error);
                 setError("Failed to update task.");
             } finally {
                 setIsSavingTomorrowEdit(false);
@@ -690,15 +749,22 @@ export const Tomorrow = () => {
                 setTodayTasks((prev) => {
                     const filtered = prev.filter((t) => t.id !== deleteAlert.taskId);
                     const reRanked = filtered.map((t, i) => ({ ...t, rank: i + 1 }));
-                    // Persist new ranks best-effort
-                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => { });
+                    // Persist new ranks best-effort with date preservation
+                    Promise.all(reRanked.map((t) => updateTask(t.id, { 
+                        rank: t.rank,
+                        date: t.date || 'today' 
+                    }))).catch(() => { });
                     return reRanked;
                 });
             } else if (deleteAlert.list === 'tomorrow') {
                 setTomorrowTasks((prev) => {
                     const filtered = prev.filter((t) => t.id !== deleteAlert.taskId);
                     const reRanked = filtered.map((t, i) => ({ ...t, rank: i + 1 }));
-                    Promise.all(reRanked.map((t) => updateTask(t.id, { rank: t.rank }))).catch(() => { });
+                    // Persist new ranks best-effort with date preservation
+                    Promise.all(reRanked.map((t) => updateTask(t.id, { 
+                        rank: t.rank,
+                        date: t.date || 'tomorrow' 
+                    }))).catch(() => { });
                     return reRanked;
                 });
             }
@@ -771,6 +837,21 @@ export const Tomorrow = () => {
                     <h2 className="text-lg md:text-xl font-bold text-neutral-600 dark:text-neutral-400">
                         Let&apos;s plan your tomorrow!
                     </h2>
+                    
+                    {/* DEBUG: Temporary test button */}
+                    <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-sm">
+                        <p className="text-yellow-800 dark:text-yellow-200 mb-2">Debug Mode: Rollover disabled</p>
+                        <button
+                            onClick={() => {
+                                console.log('Current state:');
+                                console.log('Today tasks:', todayTasks);
+                                console.log('Tomorrow tasks:', tomorrowTasks);
+                            }}
+                            className="bg-yellow-500 text-white px-3 py-1 rounded text-xs mr-2"
+                        >
+                            Log Current State
+                        </button>
+                    </div>
                 </div>
             </div>
 

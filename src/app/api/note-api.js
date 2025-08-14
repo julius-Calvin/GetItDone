@@ -15,9 +15,15 @@ import {
 // Create task with date filtering
 export const addTask = async (userId, taskData) => {
     try {
+        // Ensure date is properly set (default to 'today' if not specified)
+        const normalizedTaskData = {
+            ...taskData,
+            date: taskData.date || 'today', // Default to 'today' if no date specified
+        };
+
         // Get current task count for the specific date
         let taskCount = 0;
-        if (taskData.date === 'tomorrow') {
+        if (normalizedTaskData.date === 'tomorrow') {
             const tomorrowTasks = await getTomorrowTasks(userId);
             taskCount = tomorrowTasks.length;
         } else {
@@ -26,16 +32,16 @@ export const addTask = async (userId, taskData) => {
         }
 
         const docRef = await addDoc(collection(db,"tasks"), {
-            ...taskData,
+            ...normalizedTaskData,
             isFinished: false,
             userId: userId,
             rank: taskCount + 1,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         })
-        console.log(taskData);
+        console.log('Task added:', normalizedTaskData);
         console.log("Document written with ID: ", docRef.id);
-        return { id: docRef.id, ...taskData, userId };
+        return { id: docRef.id, ...normalizedTaskData, userId };
     } catch (error) {
         console.error("Error adding document: ", error);
         throw error;
@@ -77,8 +83,9 @@ export const getTodayTasks = async (userId) => {
     
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      // Include tasks with date = 'today' or no date field (legacy tasks)
-      if (data.date === 'today' || !data.date) {
+      // Only include tasks explicitly marked as 'today' or legacy tasks without any date field
+      // Never include tasks explicitly marked as 'tomorrow'
+      if (data.date === 'today' || (data.date === undefined && !data.hasOwnProperty('date'))) {
         tasks.push({ id: doc.id, ...data });
       }
     });
@@ -140,6 +147,16 @@ export const rolloverTomorrowTasksToToday = async (userId) => {
   try {
     if (!userId) return { moved: 0 };
 
+    // Check if rollover has already been done today to prevent double execution
+    const rolloverKey = `rollover_${userId}_${new Date().toDateString()}`;
+    if (typeof window !== 'undefined') {
+      const alreadyRolledOver = localStorage.getItem(rolloverKey);
+      if (alreadyRolledOver === 'true') {
+        console.log('Rollover already completed today for this user');
+        return { moved: 0, alreadyCompleted: true };
+      }
+    }
+
     // Fetch latest lists
     const [todayTasks, tomorrowTasks] = await Promise.all([
       getTodayTasks(userId),
@@ -147,8 +164,14 @@ export const rolloverTomorrowTasksToToday = async (userId) => {
     ]);
 
     if (!tomorrowTasks || tomorrowTasks.length === 0) {
+      // Mark as completed even if no tasks to move
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(rolloverKey, 'true');
+      }
       return { moved: 0 };
     }
+
+    console.log(`API rollover: Moving ${tomorrowTasks.length} tasks from tomorrow to today...`);
 
     // Determine starting rank (handle empty today list gracefully)
     const maxRank = (todayTasks || []).reduce((max, t) => Math.max(max, t?.rank || 0), 0);
@@ -164,6 +187,12 @@ export const rolloverTomorrowTasksToToday = async (userId) => {
       })
     );
 
+    // Mark rollover as completed for today
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(rolloverKey, 'true');
+    }
+
+    console.log(`API rollover: Successfully moved ${tomorrowSorted.length} tasks to today`);
     return { moved: tomorrowSorted.length };
   } catch (error) {
     console.error('Error during rollover:', error);
