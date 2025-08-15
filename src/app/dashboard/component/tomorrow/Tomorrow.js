@@ -837,21 +837,6 @@ export const Tomorrow = () => {
                     <h2 className="text-lg md:text-xl font-bold text-neutral-600 dark:text-neutral-400">
                         Let&apos;s plan your tomorrow!
                     </h2>
-                    
-                    {/* DEBUG: Temporary test button */}
-                    <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-sm">
-                        <p className="text-yellow-800 dark:text-yellow-200 mb-2">Debug Mode: Rollover disabled</p>
-                        <button
-                            onClick={() => {
-                                console.log('Current state:');
-                                console.log('Today tasks:', todayTasks);
-                                console.log('Tomorrow tasks:', tomorrowTasks);
-                            }}
-                            className="bg-yellow-500 text-white px-3 py-1 rounded text-xs mr-2"
-                        >
-                            Log Current State
-                        </button>
-                    </div>
                 </div>
             </div>
 
